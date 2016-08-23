@@ -1,0 +1,321 @@
+#!/usr/bin/env python
+
+import commands
+import os
+import sys
+import time
+import socket
+import re
+from datetime import datetime
+from datetime import timedelta
+from A52.Framestore import Framestore
+from A52.dlProject import dlProject
+from A52.dlLibrary import dlLibrary
+from A52.db.dbcontrol import controller
+from A52.utils import dateutil
+from A52.utils import messenger
+db = controller()
+from main import rrd
+import logging
+log = logging.getLogger(__name__)
+
+#from A52 import environment
+#environment.set_context('live')
+
+
+class concurrent_users(rrd):
+
+
+	def __init__(self,verbose=False):
+		# the timestamp of our first ledger id
+		self.verbose=verbose
+		self.first_ledger_ts =1300983819
+		self.rrd_dir = '/Volumes/discreet/lib/ganglia/rrds/framestores'
+		self.rrd_files = {	'sanstone01':'sanstone01_concurrent_users.rrd',
+						'sanstone02':'sanstone02_concurrent_users.rrd',
+						'sanstone03':'sanstone03_concurrent_users.rrd',
+						'sanstone04':'sanstone04_concurrent_users.rrd',
+						'sanstone05':'sanstone05_concurrent_users.rrd',
+						'sanstone06':'sanstone06_concurrent_users.rrd',
+						'sanstone07':'sanstone07_concurrent_users.rrd'}
+						#'sanstone08':'sanstone08_concurrent_users.rrd'}
+
+	def run(self):
+		log.info("Running")
+		#self.update_rrds()
+		self.sync_rrds()
+
+	def update_rrds(self,timestamp='N'):
+		"""
+		Update the concurrent user rrd for each framestore
+		"""
+		if timestamp == 'N':
+			stones = self.poll()
+		else:
+			stones = self.poll(timestamp=timestamp)
+		for stone in stones:
+			rrd_file = "%s/%s_concurrent_users.rrd" % (self.rrd_dir,stone.data['name'].lower())
+			log.info("RRD_FILE: %s" % rrd_file)
+			if not os.path.exists(rrd_file):
+				log.info("Creating rrds: %s" % (self.first_ledger_ts))
+			#	self.create_rrds(self.first_ledger_ts)
+			log.info("Updating rrd: %s [%s] %s " % (rrd_file,timestamp,stone.concurrent_users))
+			#print "self.update_rrd(",rrd_file,timestamp,stone.concurrent_users
+			#self.update_rrd(rrd_file,timestamp,stone.concurrent_users)
+	
+	def poll(self,sanstone=None,timestamp=None):
+		"""
+		Get the # of concurrent users at the given
+		timestamp for each stone
+		"""
+		if not timestamp:
+			timestamp = int(round(time.time(),0))
+		log.info("timestamp:%s" % timestamp)
+		log.info("Getting stones")
+		if not sanstone:
+			# get current stones
+			stones = Framestore.find(status='active')
+		else:
+			stones = Framestore.find(name=sanstone,status='active')
+		# find the concurrent users for each stone
+		for stone in stones:
+			fs_uid = stone.data['uid']
+			log.info("Getting user count for stone uid: %s" % fs_uid)
+			sel = """	select
+						count(l.uid)
+					from
+						ledger as l
+					left join
+						dl_projects as dlp
+						on l.dl_project_uid=dlp.uid
+					where
+						dlp.framestore_uid=%s
+						and unix_timestamp(start_time) < %s
+						and ( unix_timestamp(stop_time) > %s
+							or stop_time is null)
+				""" % (fs_uid,timestamp,timestamp)
+			dt = datetime.fromtimestamp(timestamp)
+			ldt = dateutil.legible_date(dt,24)
+			count = db.select_single(database='a52_discreet',statement=sel)
+			log.info("Count at %s: %s: %s" % (ldt,stone.data['name'],count))
+			stone.concurrent_users = count
+			stone.timestamp = timestamp
+		return stones
+	
+	def create_rrds(self,timestamp=None):
+		"""
+		Create the concurrent user rrd file
+		"""
+		if not timestamp:
+			timestamp = self.first_ledger_ts
+		rrdcreate = "rrdtool create --no-overwrite"
+		for rrd in self.rrd_files:
+			args = " %s/%s -b %d DS:concurrent_users:GAUGE:600:0:1000 RRA:AVERAGE:0.5:12:1200 RRA:MIN:0.5:12:1200 RRA:MAX:0.5:12:1200" % (self.rrd_dir,rrd,timestamp)
+			command = rrdcreate+args
+			print "Creating rrd:",command
+			os.system(command)
+
+	def sync_rrds(self,timestamp=None):
+		"""
+		Find the current active framestores
+		and update it's rrd file.
+		"""
+		for sanstone in self.rrd_files.keys():
+			self.sync_rrd(sanstone,timestamp=timestamp)
+	
+	def sync_rrd(self,sanstone,timestamp=None):
+		# get the uid of the framestore
+		#stone_uid = Framestore.find_uid(name=sanstone)
+		#if not stone_uid:
+		#	print "Error: could not find uid for %s" % sanstone
+		#	return 
+		log.info("Syncing rrd")
+		rrdfile = self.get_sanstone_file(sanstone)
+		if not rrdfile:
+			message = "Error: Could not find rrd file for %s" % sanstone
+			raise Exception,message
+		if not timestamp:
+			# get the last timestamp from the rrds
+			lastupdate = self.lastupdate(rrdfile)
+			log.info("Last rrd update: %s" % lastupdate)
+			if lastupdate:
+				first_ts = int(lastupdate)+600
+			else:
+				# get the first ledger entry start time
+				sel = "select min(start_time) from ledger"
+				first_time = db.select_single(database='a52_discreet',statement=sel)
+				first_ts = int(dateutil.datetime_to_timestamp(first_time))
+		current_ts = int(time.time())
+		log.info('Range: %s,%s,600' % (first_ts,current_ts))
+		for ts in range(first_ts,current_ts,600):
+			log.info("polling %s @ %s" % (sanstone,ts))
+			stones = self.poll(sanstone=sanstone,timestamp=ts)
+			log.info("Stones:%s" % stones)
+			for stone in stones:
+				log.info("Updating rrdfile: %s [%s] %s" % (rrdfile,ts,stone.concurrent_users))
+				self.update_rrd(rrdfile,ts,stone.concurrent_users,verbose=self.verbose)
+
+	def get_sanstone_file(self,name):
+		if self.rrd_files.has_key(name):
+			return "%s/%s" % (self.rrd_dir,self.rrd_files[name])
+		return None
+
+
+class library_check(rrd):
+	def __init__(self):
+		pass
+
+	def run(self):
+		self.dl_library_check()
+
+	def dl_library_check(self,hours=24):
+		"""
+		Check modification times on the dl libraries 
+		and send an email for any with a modification
+		time of less than 'hours'
+		"""
+		now = datetime.today()
+		stones = Framestore.find(status='active')
+		#stones = Framestore.find(host='flame01',status='active')
+		msg = ""
+		lengths = [1]
+		form = {}
+		for fs in stones:
+			fs.scan_libraries()
+			host = fs.data['host']
+			for lib in dlLibrary.find(host=host,volume=fs.data['volume']):
+				project = lib.data['project']
+				mod_utime = lib.data['date_modified']
+				# on RHEL4 mysql dates are returned as DateTime objects
+				if type(mod_utime).__name__ == 'DateTime':
+					# MU: 2011-04-28 10:17:23.00
+					# parts: (2011, 4, 28, 10, 17, 23.0, 3, 118, 1)
+					mod_utime = datetime(*mod_utime.tuple()[0:7])
+				# form the delta in hours 
+				delta = now - mod_utime
+				day = timedelta(days=1)
+				if delta < day:
+					if form.has_key(host):
+						if form[host].has_key(project):
+							form[host][project][lib] = delta
+						else:
+							form[host][project] = {lib:delta}
+					else:
+						form[host] = {project:{lib:delta}}
+					# find the longest library name
+					lengths.append(len(lib.data['name'])-6)
+		pad = "%%-%ds" % max(lengths)
+
+		for host in form:
+			msg+="\nLibraries changed on %s during last 24 hours...\n" % host
+			for project in form[host]:
+				msg+="\n%s %s\n" % (host,project)
+				for lib in form[host][project].keys():
+					delta = form[host][project][lib]
+					# strip off the xxx.clib extension
+					name = "%s " % re.sub('.[0-9]{3}.clib','',lib.data['name'])
+					for i in range(len(name),max(lengths),1):
+						if i&1:
+							name+=" "
+						else:
+							name+="_"
+					line = "  * %s%s hours\n" % (name,round(delta.seconds/3600.0,2))
+					msg+=line
+		print msg
+#		messenger.Email('eng@a52.com','tommy.hooper@a52.com','dl archive needs',msg)
+#		messenger.Email('eng@a52.com','dlarchives@a52.com','dl archive needs',msg)
+
+	
+class sync_libraries:
+
+
+	def __init__(self):
+		pass
+
+	def run(self):
+		stones = Framestore.find(status='active')
+		for fs in stones:
+			print "Syncing dl libraries on %s" % fs.data['name']
+			print "SL:",fs.sync_libraries
+			#fs.sync_libraries()
+
+class framestore_df:
+	"""
+	Get the disk free for a framestore
+	"""
+	# TODO: Add FS checker: 
+	#	80% email once a day
+	#	85% email once an hour
+	#	90% shutdown 
+
+
+	def __init__(self):
+		self.hostname = socket.gethostname()
+		#print "HOSTNAME:",self.hostname
+	
+	def run(self):
+		"""
+		Get a framestore object for each active framestore,
+		have it do it's df and save
+		"""
+		stones = Framestore.find(status='active')
+		for fs in stones:
+			if fs.df():
+				fs.save()
+
+class dl_project_du:
+	"""
+	Estimate the disk usage 
+	for a dl project
+	"""
+
+	def __init__(self):
+		self.hostname = socket.gethostname()
+
+	def run(self):
+		# get the framestores for this host
+		stones = Framestore.find(host=self.hostname,status='active')
+		for stone in stones:
+			log.info("Estimating project sizes on %s" % stone.data['name'])
+			dlprojects = stone.get_projects()
+			for i,dlp in dlprojects.iteritems():
+				dl_project = dlProject.find(framestore_uid=stone.data['uid'],name=dlp['name'])
+				if dl_project:
+					dl_project = dl_project[0]
+					log.info("Calculating size of project: %s" % dl_project.data['name'])
+					pstats = dl_project.du(poll=True)
+		
+
+
+if __name__ == '__main__':
+#	d = dl_project_du()
+#	d.run()
+#	f = framestore_df()
+#	f.run()
+#	s = sync_libraries()
+#	s.run()
+#	l = library_check()
+#	l.run()
+
+#	l = concurrent_users(verbose=False)
+#	l.sync_rrd('sanstone02')
+#	l.run()
+
+#	l.create_rrds()
+#	l.fill_in_rrds(verbose=True)
+#	l.run()
+
+
+	#first_ledger_ts =1300983819
+	#r.create_rrds(first_ledger_ts)
+	#r.fill_in_rrds()
+	#r.update_rrds()
+	pass
+
+
+
+
+
+
+
+

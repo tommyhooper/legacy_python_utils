@@ -1,0 +1,101 @@
+lmutil - Copyright (c) 1989-2003 by Macrovision Corporation. All rights reserved.
+lmstat v9.21
+Flexible License Manager status on Thu 7/7/2011 14:22
+License server status: 27000@don
+    License file(s) on don: /var/flexlm/adsk_server.lic:
+       don: license server UP (MASTER) v11.7
+Vendor daemon status (on don):
+  adskflex: UP v11.7
+Feature usage info:
+Users of 85527MAYA_F:  (Total of 18 licenses issued;  Total of 16 licenses in use)
+  "85527MAYA_F" v1.000, vendor: adskflex
+  floating license
+    adamc CG12 CG12 (v1.000) (don/27000 2913), start Thu 7/7 9:59
+    adamn cg05 cg05 (v1.000) (don/27000 17516), start Thu 7/7 11:39
+    andyl cg07 cg07 (v1.000) (don/27000 6912), start Thu 7/7 13:23
+    ianr bellcg09 bellcg09 (v1.000) (don/27000 18002), start Thu 7/7 10:15
+    joec bellcg04 bellcg04 (v1.000) (don/27000 3809), start Thu 7/7 11:05
+    joep cg06 cg06 (v1.000) (don/27000 12115), start Thu 7/7 11:44
+    johnt cg09 cg09 (v1.000) (don/27000 5313), start Thu 7/7 13:31
+    julianf cg03 cg03 (v1.000) (don/27000 10611), start Thu 7/7 12:12
+    kirks bellcg10 bellcg10 (v1.000) (don/27000 14103), start Thu 7/7 13:06
+    martinf bellcg03 bellcg03 (v1.000) (don/27000 12905), start Thu 7/7 13:46
+    matto bellcg07 bellcg07 (v1.000) (don/27000 15523), start Thu 7/7 11:04
+    max bellcg11 bellcg11 (v1.000) (don/27000 9940), start Thu 7/7 12:09
+    paulo CG08 CG08 (v1.000) (don/27000 14619), start Thu 7/7 13:09
+    ryan.mcdougal bellcg05 bellcg05 (v1.000) (don/27000 16921), start Thu 7/7 14:00
+    timd bellcg01 bellcg01 (v1.000) (don/27000 5611), start Thu 7/7 10:08
+    wayneh bellcg14 bellcg14 (v1.000) (don/27000 9301), start Wed 7/6 22:00
+Users of 85529MAYAMFS_F:  (Total of 18 licenses issued;  Total of 1 license in use)
+  "85529MAYAMFS_F" v1.000, vendor: adskflex
+  floating license
+    ianr bellcg09 bellcg09 (v1.000) (don/27000 8231), start Thu 7/7 11:29
+Users of 85530MAYAMMR_F:  (Total of 18 licenses issued;  Total of 5 licenses in use)
+  "85530MAYAMMR_F" v1.000, vendor: adskflex
+  floating license
+    andyl cg07 cg07 (v1.000) (don/27000 8012), start Thu 7/7 13:33
+    ianr bellcg09 bellcg09 (v1.000) (don/27000 6443), start Thu 7/7 12:39
+    martinf bellcg03 bellcg03 (v1.000) (don/27000 16806), start Thu 7/7 13:58
+    paulo CG08 CG08 (v1.000) (don/27000 4926), start Thu 7/7 13:11
+    ryan.mcdougal bellcg05 bellcg05 (v1.000) (don/27000 3426), start Thu 7/7 14:06
+Users of 85531MAYAMMR1_F:  (Total of 18 licenses issued;  Total of 1 license in use)
+  "85531MAYAMMR1_F" v1.000, vendor: adskflex
+  floating license
+    rush Z057 Z057 (v1.000) (don/27000 18712), start Thu 7/7 13:53
+Users of 85738SMKMAC_F:  (Total of 1 license issued;  Total of 1 license in use)
+  "85738SMKMAC_F" v1.000, vendor: adskflex
+  floating license
+    root smack01 (v1.000) (don/27000 19821), start Thu 7/7 13:46
+Users of 85737SMKMAC_2012_0F:  (Total of 1 license issued;  Total of 1 license in use)
+  "85737SMKMAC_2012_0F" v1.000, vendor: adskflex
+  floating license
+    root smack01 (v1.0) (don/27000 19721), start Thu 7/7 13:46
+Users of 85537MAYAMMR1_2011_0F:  (Total of 18 licenses issued;  Total of 1 license in use)
+  "85537MAYAMMR1_2011_0F" v1.000, vendor: adskflex
+  floating license
+    rush Z057 Z057 (v1.0) (don/27000 18812), start Thu 7/7 13:53
+Users of 85537MAYAMMR_2011_0F:  (Total of 18 licenses issued;  Total of 5 licenses in use)
+  "85537MAYAMMR_2011_0F" v1.000, vendor: adskflex
+  floating license
+    andyl cg07 cg07 (v1.0) (don/27000 7912), start Thu 7/7 13:33
+    ianr bellcg09 bellcg09 (v1.0) (don/27000 6343), start Thu 7/7 12:39
+    martinf bellcg03 bellcg03 (v1.0) (don/27000 16706), start Thu 7/7 13:58
+    paulo CG08 CG08 (v1.0) (don/27000 5026), start Thu 7/7 13:11
+    ryan.mcdougal bellcg05 bellcg05 (v1.0) (don/27000 3326), start Thu 7/7 14:06
+Users of 85537MAYAMFS_2011_0F:  (Total of 18 licenses issued;  Total of 1 license in use)
+  "85537MAYAMFS_2011_0F" v1.000, vendor: adskflex
+  floating license
+    ianr bellcg09 bellcg09 (v1.0) (don/27000 8131), start Thu 7/7 11:29
+Users of 85537MAYA_2011_0F:  (Total of 18 licenses issued;  Total of 16 licenses in use)
+  "85537MAYA_2011_0F" v1.000, vendor: adskflex
+  floating license
+    adamc CG12 CG12 (v1.0) (don/27000 3013), start Thu 7/7 9:59
+    adamn cg05 cg05 (v1.0) (don/27000 17616), start Thu 7/7 11:39
+    andyl cg07 cg07 (v1.0) (don/27000 7012), start Thu 7/7 13:23
+    ianr bellcg09 bellcg09 (v1.0) (don/27000 17902), start Thu 7/7 10:15
+    joec bellcg04 bellcg04 (v1.0) (don/27000 3709), start Thu 7/7 11:05
+    joep cg06 cg06 (v1.0) (don/27000 12215), start Thu 7/7 11:44
+    johnt cg09 cg09 (v1.0) (don/27000 5413), start Thu 7/7 13:31
+    julianf cg03 cg03 (v1.0) (don/27000 10511), start Thu 7/7 12:12
+    kirks bellcg10 bellcg10 (v1.0) (don/27000 14203), start Thu 7/7 13:06
+    martinf bellcg03 bellcg03 (v1.0) (don/27000 13005), start Thu 7/7 13:46
+    matto bellcg07 bellcg07 (v1.0) (don/27000 15623), start Thu 7/7 11:04
+    max bellcg11 bellcg11 (v1.0) (don/27000 10040), start Thu 7/7 12:09
+    paulo CG08 CG08 (v1.0) (don/27000 14519), start Thu 7/7 13:09
+    ryan.mcdougal bellcg05 bellcg05 (v1.0) (don/27000 17021), start Thu 7/7 14:00
+    timd bellcg01 bellcg01 (v1.0) (don/27000 5511), start Thu 7/7 10:08
+    wayneh bellcg14 bellcg14 (v1.0) (don/27000 9401), start Wed 7/6 22:00
+----------------------------------------------------------------------------
+License server status: 27001@don.a52.com
+    License file(s) on don.a52.com: /usr/local/foundry/FLEXlm/foundry_float.lic:
+don.a52.com: license server UP (MASTER) v10.8
+Vendor daemon status (on don.a52.com):
+   foundry: UP v10.8
+Feature usage info:
+----------------------------------------------------------------------------
+License server status: 27002@don
+    License file(s) on don: /usr/local/ISL/FLEXlm/isl_license.dat:
+       don: license server UP (MASTER) v9.2
+Vendor daemon status (on don):
+       isl: UP v9.2
+Feature usage info:

@@ -1,0 +1,12 @@
+17a18
+> clamp
+19a21
+> combine
+54a57
+> intermediate
+70a74
+> mask
+95a100
+> separate
+103a109
+> synColor

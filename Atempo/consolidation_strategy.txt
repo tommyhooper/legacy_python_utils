@@ -1,0 +1,54 @@
+
+Strategy to consolidate all of our existing archives
+into a smaller pool by removing duplicates.
+
+Preparation:
+  1. Create 2 new archiving strategies / pools / 
+     applications / whatever you call them.
+     - a 'backup' strategy for work in progress and 
+       incremental backups.
+     - an 'archive' strategy for completed projects.
+       (this strategy should be written twice - one
+        for offsite storage).
+  2. Once the 2 new strategies are created, lock the
+     current ones that we are consolidating so that
+     hopefully there are no changes to the data on 
+     the atempo side. 
+  2. Now that that everything is locked, get a list
+     of all the cartridges in the pools we want to 
+     consolidate using tina_cart_control and store 
+     the information in the mysql db.
+  3. Get a list of all files contained on each cartridge
+     using tina_listcart and store the information in
+     the mysql db.
+
+  * The mysql db gives us much faster access to the atempo
+    data as well as giving us the ability to add and 
+    manipulate fields we will use to keep track of
+    the consolidation progress.
+
+Steps...
+Iterate through all of the tapes, starting with tape 1:
+
+  1. Get a list of all the files on the tape from the db.
+  2. Generate a list of projects from the list of files.
+  3. Check to see if this project exists in a more recent
+     'application'. If so we can disregard it, but probably 
+      should not mark it as 'restored' since it has not
+      passed our 'sanity check' (step 7).
+  4. For each project in the list use tina_find to get the
+     cartridges we need to restore from.
+  5. Since tina_find gives us cartridge 'labels', use tina_cart_control
+     to resolve the labels into our barcodes.
+  6. Use tina_restore to restore each project into our recover directory.
+  7. Scan the restored projects and do a sanity check against the database.
+     The 'database' is the detailed output of tina_listcart stored in our
+     mysql database. Pretty much all I have to go on is the modification date
+     and the byte count. The byte count may differ slightly do to 
+     filesystem parameters.
+  8. For each file that passes our sanity check mark that file as 
+     'restored' in our database.
+  9. Once all of the projects on the current tape are processed,
+     that tape should be able to be recycled.
+
+

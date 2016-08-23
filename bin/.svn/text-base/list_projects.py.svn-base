@@ -1,0 +1,136 @@
+#!/usr/bin/python
+# version 1.0
+# $Revision: 1.6 $
+
+import time
+import datetime
+import sys
+import string
+import os
+import glob
+import re
+
+# import the current wiretap server
+version = os.path.basename(os.path.realpath('/usr/discreet/wiretap/current'))
+paths = glob.glob('/usr/discreet/*_%s' % version)
+ifffsHome = os.path.split(paths[0])[1]
+sys.path.append('/usr/discreet/%s/python/' % ifffsHome)
+import libwiretapPythonClientAPI as wt
+
+
+class Framestore:
+
+
+	def __init__(self,hostname,nodeId):
+		"""
+		Framestore Object
+		"""
+		self.hostname = hostname
+		self.nodeId = "/%s" % nodeId.strip("/")
+		#if not wt.WireTapClientInit():
+		#	raise "Unable to initialize WireTap client API."
+		#self.server = wt.WireTapServerHandle(hostname)
+
+	@staticmethod
+	def get_stones(hostname):
+		"""
+		Get the stonefs nodes listed by the wiretap server.
+		NOTE: not all nodes will be valid.
+		"""
+		if not wt.WireTapClientInit():
+			raise "Unable to initialize WireTap client API."
+		server = wt.WireTapServerHandle(hostname)
+		root_node = wt.WireTapNodeHandle()
+		server.getRootNode(root_node)
+		child = wt.WireTapNodeHandle ()
+		numChildren = wt.WireTapInt( 0 )
+		if not root_node.getNumChildren( numChildren ):
+			raise 'Unable to obtain number of children: %s.' % parent.lastError()
+		i = 0
+		stones = {}
+		while i < numChildren:
+			root_node.getChild( i, child )
+			name = wt.WireTapStr()
+			typeStr = wt.WireTapStr()
+			#if not child.getDisplayName( name ): 
+			#	print 'Unable to obtain node name: %s.' % child.lastError()
+			#if not child.getNodeTypeStr( typeStr ): 
+			#	print 'Unable to obtain node type: %s.' % child.lastError()
+			child.getDisplayName(name)
+			child.getNodeTypeStr(typeStr)
+			if name.c_str() and typeStr.c_str():
+				stones[name.c_str()] = Framestore(hostname,name.c_str())
+			i = i + 1
+		server = None
+		wt.WireTapClientUninit();
+		return stones
+
+	def list_projects(self):
+		"""
+		List the projects on the framestore
+		"""
+		if not wt.WireTapClientInit():
+			raise "Unable to initialize WireTap client API."
+		server = wt.WireTapServerHandle(self.hostname)
+		parent = wt.WireTapNodeHandle(server,self.nodeId)
+		child = wt.WireTapNodeHandle ()
+		numChildren = wt.WireTapInt( 0 )
+		if not parent.getNumChildren( numChildren ):
+			raise 'Unable to obtain number of children: %s.' % parent.lastError()
+		i = 0
+		projects = []
+		while i < numChildren:
+			parent.getChild( i, child )
+			name = wt.WireTapStr()
+			typeStr = wt.WireTapStr()
+			if not child.getDisplayName( name ): 
+				raise 'Unable to obtain node name: %s.' % child.lastError()
+			if not child.getNodeTypeStr( typeStr ): 
+				raise 'Unable to obtain node type: %s.' % child.lastError()
+			#print "Node: '%s' type: %s" %( name.c_str(), typeStr.c_str() )
+			if typeStr.c_str() == "PROJECT":
+				projects.append(name.c_str())
+			i = i + 1
+		server = None
+		wt.WireTapClientUninit();
+		return projects
+
+
+
+
+if __name__ == '__main__':
+
+	if len(sys.argv) == 1:
+		hosts = ['flame01','flame02','flame03','flame04','flame06','smoke01']
+	else:
+		hosts = sys.argv[1:]
+
+	print "Listing projects on:",', '.join(hosts)
+	projects = {}
+	for host in hosts:
+		print "[44m%s[m" % host
+		stones = Framestore.get_stones(host)
+		for id in stones:
+			real_projects = []
+			fake_projects = []
+			print "\t[40m  ----------- %s ----------- [m" % id
+			for proj in stones[id].list_projects():
+				regx = re.search("(^.*)([0-9]{2,2}[A-Z][0-9]{3,3})(.*)",proj)
+				if regx:
+					real_projects.append(proj)
+				else:
+					fake_projects.append(proj)
+
+			real_projects.sort()
+			fake_projects.sort()
+			i = 1
+			if real_projects:
+				for proj in real_projects:
+					print "\t%2d %s" % (i,proj)
+					i+=1
+			if fake_projects:
+				#print "\t[41mUnrecognized projects:[m" 
+				for proj in fake_projects:
+					print "\t[31m%2d %s[m" % (i,proj)
+					i+=1
+

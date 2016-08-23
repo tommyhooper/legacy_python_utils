@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# chkconfig: 2345 99 99
+# description: A52 stat daemon
+# processname: a52sd
+
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+export set PYTHONPATH="/Volumes/discreet/lib/python2.3/site-packages"
+
+case "$1" in
+  start)
+    python /Volumes/discreet/lib/python2.3/site-packages/A52/utils/daemon/a52sd.py start
+  ;;
+  stop)
+    python /Volumes/discreet/lib/python2.3/site-packages/A52/utils/daemon/a52sd.py stop
+  ;;
+  restart)
+    python /Volumes/discreet/lib/python2.3/site-packages/A52/utils/daemon/a52sd.py restart
+  ;;
+  *)
+    echo "Usage: /etc/init.d/a52sd {start|stop|restart}"
+    exit 1
+  ;;
+esac

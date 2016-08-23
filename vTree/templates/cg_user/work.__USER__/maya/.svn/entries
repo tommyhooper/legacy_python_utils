@@ -1,0 +1,128 @@
+10
+
+dir
+4
+svn://bishop/a52/trunk/vTree/samples/CGI/__SHOT__/work.__USER__/maya
+svn://bishop/a52
+
+
+
+2011-11-16T19:13:38.161636Z
+4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2d118b03-f6a4-4aee-b9ef-d97fec4010ba
+
+FBX
+dir
+
+renderScenes
+dir
+
+scenes
+dir
+
+FBX export
+dir
+
+textures
+dir
+
+particles
+dir
+
+autosave
+dir
+
+DAE_FBX
+dir
+
+Autodesk_Crosswalk_Importer
+dir
+
+sound
+dir
+
+3DS
+dir
+
+DAE_FBX export
+dir
+
+mentalRay
+dir
+
+Autodesk_Crosswalk_Exporter
+dir
+
+tmp
+dir
+
+assets
+dir
+
+images
+dir
+
+3dPaintTextures
+dir
+
+data
+dir
+
+renderData
+dir
+
+clips
+dir
+
+workspace.mel
+file
+
+
+
+
+2011-11-16T21:52:55.330219Z
+e1829c39b397acad94bd626a802d6b48
+2011-11-16T19:13:38.161636Z
+4
+
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+304
+
+mel
+dir
+

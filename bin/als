@@ -1,0 +1,210 @@
+#!/usr/bin/python
+
+import os,string,re,sys
+from optparse import OptionParser
+
+p = OptionParser()
+p.add_option("-R",dest='recursive', action='store_true',default=False,help="List recursive sequences (careful where you run tis from)")
+options,args = p.parse_args()
+recursive = options.recursive
+
+def scan_dir(target):
+	"""Scan the directory and return a list of directories, 
+	   files, links, and of course... sequences"""
+	if os.access(target,0):
+		directories = []
+		files = []
+		full_files = []
+		for item in os.listdir(target):
+			# categorize:
+			if item[0] != '.':
+				if os.path.isdir(os.path.join(target,item)):
+					directories.append(item)
+				elif os.path.isfile(os.path.join(target,item)):
+					files.append(item)
+					full_files.append("%s/%s" % (target,item))
+				elif os.path.islink(os.path.join(target,item)):
+					# for now, treat links as files
+					files.append(item)
+		# sort the lists
+		directories.sort()
+		if full_files:
+			sequences = scan_file_list_for_sequences(full_files,target)
+		else:
+			sequences = {}
+
+		return {'sequences':sequences,'directories':directories}
+
+	# if we cannot access the directory, return 0
+	return 0
+
+
+def scan_dir_for_sequences(search_dir):
+	# returns an array of each sequence
+	# look for the search directory
+	try:
+		os.stat(search_dir)
+	except OSError:
+		print "%s: Directory not found" % (search_dir)
+		return 0
+	else:
+		# 1) get a list of all the files found in this directory
+		# 2) loop through each file running the regular exp. if the prefix or extension changes, we have a new sequence
+		found_files = list()
+		for root, dirs, files in os.walk(search_dir):
+			if files:
+				for file in files:
+					full_path_file = "%s/%s" % (root,file)
+					found_files.append(full_path_file)
+		seq = scan_file_list_for_sequences(found_files,search_dir)
+		return seq
+
+def scan_file_list_for_sequences(files,search_dir):
+	"""
+	Find sequences in the given file list
+	'search_dir' is provided for formatting the output
+	"""
+	# first, separate the list based on extension to solve
+	# a problem with identical filenames with different extensions
+	# - in those cases, the numerical sort screws up the sequence
+	#   parser by listing files in this order: 
+	# 0001.cin,0001.dpx,0002.cin,0002.dpx etc...
+
+	ext_array = {}
+	for file in files:
+		file_ext = os.path.splitext(file)[1].strip('.')
+		try:
+			ext_array[file_ext].append(file)
+		except:
+			ext_array[file_ext] = [file]
+
+	fn = 1
+	seq_id = ''
+	m = 0
+	seq = {}
+	for ext in ext_array.keys():
+		ext_array[ext].sort()
+		for full_file in ext_array[ext]:
+			# seperate file from path
+			filename = os.path.basename(full_file)
+			full_path = os.path.dirname(full_file)
+			# reconstruct the relative path by removing the first X directories - where X is the number 
+			# of directories in the search_directory
+			search_dir_count = len(search_dir.split("/"))
+			relative_path = string.join(string.split(os.path.dirname(full_file),"/")[search_dir_count:],"/")
+			# split the file into 3 parts: prefix, number, and extension
+			regx = re.search('^(|.*[^0-9])([0-9]+)([^0-9]*)$',filename)
+			if regx == None:
+				#could not determine sequence
+				m = m + 1
+				seq[m] = {	'search_dir':search_dir,
+						'full_path':full_path,
+						'relative_path':relative_path,
+						'file_template':str(filename),
+						'abs_template':'',
+						'files':{},
+						'filename':str(filename),
+						'padding':'',
+						'extension':'',
+						'start':1,
+						'end':1,
+						'count':1}
+			else:
+				# if this is the first sequence - then the array will be empty - must add the first entry accordingly
+				if len(regx.groups()) == 3:
+					re_filename = regx.group(1)
+					re_padding = regx.group(2)
+					re_extension = regx.group(3)
+					file_template = "%s%s0%dd%s" % (regx.group(1),'%',len(regx.group(2)),regx.group(3))
+					# in case there is no relative_path, change the resulting // to /
+					abs_template = string.replace("%s/%s/%s" % (search_dir,relative_path,file_template),"//","/")
+					file_number = long(regx.group(2))
+					if len(seq):	
+						# check to see if the full template has changed, or if the sequence is broken (not incremented by one)
+						if "%s/%s/%s" % (search_dir,relative_path,file_template) != "%s/%s/%s" % (seq[m]['search_dir'],seq[m]['relative_path'],seq[m]['file_template']) or file_number != seq[m]['end'] + 1:
+							m = m + 1
+							seq[m] = {	'search_dir':search_dir,
+									'full_path':full_path,
+									'relative_path':relative_path,
+									'file_template':str(file_template),
+									'abs_template':abs_template,
+									'filename':re_filename.rstrip("."),
+									'padding':re_padding,
+									'extension':re_extension,
+									'files':{file_number:{	'name':filename,
+													'stats':''}},
+									'start':file_number,
+									'end':file_number,
+									'count':1}
+						else:
+							# if the template is the same and the sequence is consistent, 
+							# increment the end file number, and the count
+							# append the filename to the list of files
+							# add the filesize to the running total
+							seq[m]['end'] = file_number
+							seq[m]['count'] = seq[m]['end'] - seq[m]['start'] + 1
+							seq[m]['files'][file_number] = {	'name':filename,
+													'stats':''}
+					else:
+						m = 1
+						seq[m] = {	'search_dir':search_dir,
+								'full_path':full_path,
+								'relative_path':relative_path,
+								'file_template':str(file_template),
+								'abs_template':abs_template,
+								'filename':str(filename),
+								'padding':re_padding,
+								'extension':re_extension,
+								'files':{file_number:{	'name':filename,
+												'stats':''}},
+								'start':file_number,
+								'end':file_number,
+								'count':1}
+	
+				else:
+					print "could not determine sequence"
+			fn = fn + 1
+	return seq
+
+def hide_automount_dir(path):
+	if path.split("/")[1] == "hosts":
+		new_path = "/asylum/%s" % ("/".join(path.split("/")[4:]))
+		return new_path
+	else:
+		return path
+
+
+# substitute the current directory for no args
+if not args:
+	args = '.'
+
+for path in args:
+	base_path = os.path.abspath(path)
+	if not os.access(base_path,os.R_OK):
+		print "Directory not found:",path
+		sys.exit(1)
+
+	if recursive:
+		seqs = scan_dir_for_sequences(base_path)
+		for id in seqs.keys():
+			info = seqs[id]
+			asylum_path = hide_automount_dir(base_path)
+			if info['start'] == info['end']:
+				print "%s/%s/%s" % (asylum_path,info['relative_path'],info['file_template'] % info['start'])
+			else:
+				print "%s/%s/%s %s-%s" % (asylum_path,info['relative_path'],info['file_template'],info['start'],info['end'])
+	else:
+		s = scan_dir(base_path)
+		if s.has_key('sequences'):
+			for sid in s['sequences'].keys():
+				#print "Sequence:",s['sequences'][sid].keys()
+				info = s['sequences'][sid]
+				asylum_path = hide_automount_dir(base_path)
+				print "%s/%s/%s %s-%s" % (asylum_path,info['relative_path'],info['file_template'],info['start'],info['end'])
+
+
+#s = scan_dir_for_sequences('.')
+#for id in s.keys():
+#	print s[id]['relative_path']
+
+

@@ -1,0 +1,352 @@
+#!/usr/bin/env python
+
+import glob
+import re
+import os
+import socket
+from models import dl_projects
+from A52.utils import print_array
+from A52.utils import dbg
+from A52 import settings
+from A52 import environment
+from A52.Project import Project
+from A52.Framestore import Framestore
+from A52 import utils
+
+CONTEXT = environment.get_context()
+
+class dlProject(dl_projects):
+	"""
+	Main class to manipulate the Framestore class
+	"""
+	def __init__(self,**kwargs):
+		"""
+		DL Project Object
+		"""
+		self.data = {}
+		self.data.update(kwargs)
+		self.default = settings.DL_PROPERTIES[CONTEXT]
+		# mode is either 'project' or 'settings'
+		# 'settings' mode cannot be saved or created
+		self.mode = 'project'
+
+	def get_basename(self):
+		"""
+		Form the project basename
+		"""
+		if not self.data.has_key('project_uid'):
+			return None
+		if self.data['project_uid']:
+			project = Project.find(uid=self.data['project_uid'])[0]
+			return "%s-%s" % (project.data['job_num'],project.data['name'])
+		return None
+
+	def get_version_short(self):
+		if self.data.has_key('version'):
+			return re.search('^([0-9]{4}).*$',self.data['version']).group(1)
+		return False
+	
+	def get_framestore(self):
+		"""
+		Get the framestore object from the framestore_uid
+		"""
+		if not self.data.has_key('framestore_uid'):
+			return None
+		if self.data['framestore_uid']:
+			return Framestore.find(uid=self.data['framestore_uid'])[0]
+		return None
+
+	def __getattr__(self,name):
+		"""
+		Catch specific attributes if they are
+		used before they are set and set them here
+		for convenience
+		"""
+		if name == 'dl_basename':
+			basename = self.get_basename()
+			if basename:
+				self.dl_project_basename = self.get_basename()
+				return self.dl_project_basename
+		if name == 'framestore':
+			framestore = self.get_framestore()
+			if framestore:
+				self.framestore = framestore
+				return self.framestore
+		if name == 'version_short':
+			version_short = self.get_version_short()
+			if version_short:
+				self.version_short = version_short
+				return self.version_short
+		if name == 'localhost':
+			hostname = socket.gethostname()
+			if hostname:
+				self.localhost = hostname
+				return self.localhost
+		message = "'dlProject' object has no attribute '%s'" % name
+		raise AttributeError,message
+
+	def create_directories(self,software_type,rsync=True):
+		"""
+		This function is used to create the directory
+		tree for new projects, or check the tree for
+		existing projects.
+		NOTE: the wiretap API will create this tree when 
+		the project is created. In theory that would mean
+		this function is obsolete, however... so far it 
+		looks like the wiretap projcet trees are missing 
+		the files in 'substance/presets' (the directories 
+		are there but no actual textures).
+		"""
+		# create the main project directory
+		project_dir = "%s/%s" % (self.default['project_setup_home'],self.dl_basename)
+		dbg("mkdir %s" % project_dir)
+		utils.makedirs(project_dir)
+		if rsync:
+			# rsync the template to the main project location
+			command = "rsync -a %s/%s/project/%s/ %s/" % (	self.default['template_dir'],
+											self.version_short,
+											software_type,
+											project_dir)
+			print "Syncing project template: %s" % command
+ 			success = os.system(command)
+		# create the local project tree base on the host and it's cfg directory
+		# also create a batch directory in the local tree - I suspect it is still 
+		# used for the user 'bin' setups (it's ignoring the cfg file)
+		local_project_home = "/hosts/%s/usr/discreet/project/%s" % (self.framestore.data['host'],self.data['name'])
+		dbg("makedirs %s" % local_project_home)
+		dbg("makedirs %s/cfg" % (local_project_home))
+		dbg("makedirs %s/batch" % (local_project_home))
+		utils.makedirs(local_project_home)
+		utils.makedirs("%s/cfg" % local_project_home)
+		utils.makedirs("%s/batch" % local_project_home)
+
+	def create_host_linkbacks(self,software_type):
+		"""
+		In each module, link the software 'type' back up one directory.
+		this effectively cheats our way around the new 'type' directory 
+		that the flame adds to each module
+		"""
+		# these links cannot or should not have a link back in them
+		exclude_links = ['import','export','lut']
+		# get a list of modules from the main project tree
+		project_dir = "%s/%s" % (self.default['project_setup_home'],self.dl_basename)
+		modules = glob.glob("%s/*" % project_dir)
+		for module in modules:
+			module_name = os.path.basename(module)
+			if not module_name in exclude_links:
+				if os.path.isdir(module):
+					link = "%s/%s_%s" % (module,software_type,self.localhost)
+					#dbg("symlink('.',%s)" % link)
+					utils.symlink(".",link)
+					# the local machine makes a software-only directory
+					if self.framestore.data['host'] == self.localhost:
+						link = "%s/%s" % (module,software_type)
+						dbg("symlink('.',%s)" % link,3)
+						utils.symlink(".",link)
+
+	def create_project_links(self):
+		"""
+		Create links from the project tree to relevant areas
+		in the main project tree.
+		"""
+		project_base = "%s/%s" % (self.default['project_setup_home'],self.dl_basename)
+		link_base = "/hosts/%s/usr/discreet/project/%s" % (self.framestore.data['host'],self.data['name'])
+
+		# check for lingering batch links and remove them
+		target = "%s/%s" % (link_base,'batch''batch')
+		if os.path.islink(target):
+			print "Removing batch link"
+			try: os.remove(target)
+			except:pass
+
+		# make sure the link base exists
+		utils.makedirs(link_base)
+		directories = ['monitor','tmp','gmask','path','status','sparks','batch/pref']
+		# if this is the first time we are using this project,
+		# move the following local directories out of the way:
+		for dir in directories:
+			target = "%s/%s" % (link_base,dir)
+			# need to make sure it's not a link, and is a directory
+			# (isdir alone returns True if the link links through to a directory)
+			# just try to remove it first (will work on a link and fail on a directory)
+			dbg("Trying to remove %s" % target)
+			try:os.remove(target)
+			except:pass
+			# if it's still there it's almost certainly a directory
+			# so move it aside
+			if not os.path.islink(target):
+				#dbg("Moving %s to %s.local" % (target,target))
+				print "Moving %s to %s.local" % (target,target)
+				try:
+					os.rename(target,target+'.local')
+				except:
+					print "Could not rename %s to %s.local" % (target,target)
+		# link project directories
+		for directory in directories:
+			dbg("utils.symlink('%s/%s','%s/%s)" % (project_base,directory,link_base,directory),3)
+			utils.symlink('%s/%s' % (project_base,directory),'%s/%s' % (link_base,directory))
+
+	def create_project_cfg(self):
+		"""
+		Create the project cfg by taking the template that
+		the user chose and replacing the module home directories
+		"""
+		# first grab the lines of the choosen config file
+		template_file = '%s/%s/project_cfg/%s' % (self.default['template_dir'],self.version_short,self.data['cfg_file'])
+		if not os.access(template_file,os.R_OK):
+			# cfg file does not exist
+			message = "Error: Could not find cfg_file: %s" % template_file
+			raise Exception,message
+		f = open(template_file,'r')
+		lines = f.readlines()
+		template_lines = []
+		for line in lines:
+			#dbg(">> %s" % line.strip('\n'))
+			if re.match('^#.*',line) or line == '\n':
+				# commented or empty line - skip it...
+				pass
+			elif '~' in line:
+				# home directory line - skip it...
+				pass
+			else:
+				template_lines.append(line.strip('\n'))
+		f.close()
+
+		# move the original cfg file aside (only the original)
+		project_cfg_dir = "/hosts/%s/usr/discreet/project/%s/cfg" % (self.framestore.data['host'],self.data['name'])
+		project_cfg = "%s/%s.cfg" % (project_cfg_dir,self.data['name'])
+		if not os.access(project_cfg_dir,os.R_OK):
+			dbg("utils.makedirs(%s)" % (project_cfg_dir),3)
+			utils.makedirs(project_cfg_dir)
+		if not os.access(project_cfg+'.ori',os.R_OK):
+			# if there is no .ori file, move the current cfg aside
+			# if there is one then we assume we've already backed up
+			# the 'original' cfg and just overwrite the current one
+			try:
+				dbg("Moving original cfg aside: %s --> %s.ori" % (project_cfg,project_cfg))
+				os.rename(project_cfg,project_cfg+'.ori')
+			except: pass
+
+		# open the new cfg file
+		cfg = open(project_cfg,'w')
+		# add the non module home lines from the original cfg
+		for line in template_lines:
+			#dbg("TEMPLATE: %s" % line)
+			cfg.write(line+'\n')
+		# now add the module homes
+		modules = self.get_cfg_module_homes()
+		for index in modules['cfg_lines']:
+			#dbg("MODULE: %s" % modules['cfg_lines'][index])
+			cfg.write(modules['cfg_lines'][index]+'\n')
+		cfg.close()
+		try: os.chmod(project_cfg,0777)
+		except:pass
+
+	def get_cfg_module_homes(self):
+		"""
+		Get the module home definitions from a cfg file.
+		Module home lines in the cfg file look like:
+			Batch	 ~/batch,		 batch
+		We replace the '~' with our project home directory.
+		(dl_project_name).
+		"""
+		# there are a few module lines in the cfg file that we do not replace with the home directory
+		# 'ignored' are lines that the flame ignores for whatever reason (but we still put them in the cfg)
+		# 'dl_base' are lines that we point to one location regardless of project
+		# 'dl_share' are lines that we point to one location within a project but regardless of user
+		#	       (we are not using the user level so dl_share will be unused for now)
+		ignored = ['desktop','guides','hotkey','play','documentation']
+		undocumented = ['path','status']
+		dl_base = []
+		dl_share = []
+		template_file = '%s/%s/project_cfg/%s' % (self.default['template_dir'],self.version_short,self.data['cfg_file'])
+		# get the target cfg file 
+		if not os.access(template_file,os.R_OK):
+			# cfg file does not exist - fall back on a default cfg file
+			template_file = '%s/%s/project_cfg/film.cfg' % (self.default['template_dir'],self.version_short)
+			dbg("CFG file not found: %s" % cfg_file)
+			dbg("Using default cfg for module homes: %s" % template_file)
+		f = open(template_file,'r')
+		lines = f.readlines()
+		module_lines = []
+		for line in lines:
+			#dbg(">> %s" % line.strip('\n'))
+			if re.match('^#.*',line) or line == '\n':
+				# commented or empty line - skip it...
+				pass
+			elif '~' in line:
+				# home directory line, check for exceptions
+				module_lines.append(line.strip('\n'))
+			else:
+				# all other lines - skip
+				pass
+		f.close()
+		modules = {'directories':{},'cfg_lines':{}}
+		project_dir = "%s/%s" % (self.default['project_setup_home'],self.dl_basename)
+		i = 1
+		for line in module_lines:
+			directory = re.search("^.*(~\/[0-9A-z]+).*",line).group(1)
+			module = directory.split("/")[1]
+			line_type = 'default'
+			# check for base, or shared lines (see __init__)
+			for ex in dl_base:
+				if re.match('.*%s.*' % ex,line):
+					line_type = 'dl_base'
+					modules['cfg_lines'][i] = line.replace('~',self.default['dl_base'])
+					modules['directories'][i] = {module:directory.replace('~',self.default['dl_base'])}
+			for ex in dl_share:
+				if re.match('.*%s.*' % ex,line):
+					line_type = 'dl_share'
+					modules['cfg_lines'][i] = line.replace('~',self.default['dl_share'])
+					modules['directories'][i] = {module:directory.replace('~',self.default['dl_share'])}
+			for ex in ignored:
+				if re.match('.*%s.*' % ex,line):
+					line_type = 'ignored'
+					modules['cfg_lines'][i] = line
+					#modules['directories'][i] = {module:directory.replace('~',self.default['dl_share'])}
+			if line_type is 'default':
+				modules['cfg_lines'][i] = line.replace('~',project_dir)
+				modules['directories'][i] = {module:directory.replace('~',project_dir)}
+			i+=1
+		# manually add the undocumented modules we have to deal with
+		for directory in undocumented:
+			modules['directories'][i] = {module:"%s/%s" % (project_dir,directory)}
+			i+=1
+		return modules
+			
+	def cheat_status(self,dl_home):
+		"""
+		Pre-edit the cotents of the LastFramestoreAndProject.pref
+		in the software home's status directory. 
+		"""
+		fl = open("%s/status/LastFramestoreAndProject.pref" % (dl_home),'w')
+		fl.write("%s/%s\n" % (self.framestore.data['volume'],self.framestore.data['host']))
+		fl.write("%s\n" % self.data['name'])
+		fl.write("LocalUserDB\n")
+		fl.close()
+
+	def settings_only(self):
+		"""
+		Make this obj a 'settings only' object.
+		Delete attributes that are not used
+		"""
+		settings_fields = [	'AspectRatio','Description','FieldDominance',
+						'FrameDepth','FrameHeight','FrameWidth','SetupDir','VisualDepth',
+						'ProxyAbove8bits','ProxyDepthMode','ProxyEnable','ProxyMinFrameSize','ProxyQuality','ProxyWidthHint']
+
+		for k in self.data.keys():
+			if not k in settings_fields:
+				del(self.data[k])
+		self.mode = 'settings'
+
+
+
+if __name__ == '__main__':
+	proj = dlProject(project_uid=43,framestore_uid=7,user_id='tommy',name='new_wt_test2',ProxyAbove8bits='false',version='2011.1')
+	proj.create_project_links()
+	#print proj.version_short
+	#proj.create()
+	#proj.inspect()
+	pass
+
+

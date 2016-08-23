@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for host in q01 q02 q03 q05 q06 q07 q08 q09
+do
+	echo "[44mExecuting on $host[m: $@"
+	ssh root@$host $@
+done

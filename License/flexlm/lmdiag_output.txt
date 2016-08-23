@@ -1,0 +1,175 @@
+lmutil - Copyright (c) 1989-2007 Macrovision Europe Ltd. and/or Macrovision Corporation. All Rights Reserved.
+FLEXnet diagnostics on Thu 9/29/2011 14:45
+
+-----------------------------------------------------
+License file: 7112@don
+-----------------------------------------------------
+"burn_x86_64_r_2011_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"flare_x86_64_r_2011_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license can be checked out
+-----------------------------------------------------
+"flame_x86_64_r_2011_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"smokeadvanced_x86_64_r_2011_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"wiretapgw_all_r_2011_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license can be checked out
+-----------------------------------------------------
+"flamepremium_x86_64_r_2011_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"flame_x86_64_r" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license cannot be checked out because:
+A PACKAGE component must be specified.
+Feature:       flame_x86_64_r
+License path:  7112@don:
+FLEXnet Licensing error:-125,147
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+-----------------------------------------------------
+"flamepremium_x86_64_r" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license cannot be checked out because:
+A PACKAGE component must be specified.
+Feature:       flamepremium_x86_64_r
+License path:  7112@don:
+FLEXnet Licensing error:-125,147
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+-----------------------------------------------------
+"wiretapgw_all_r" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license cannot be checked out because:
+A PACKAGE component must be specified.
+Feature:       wiretapgw_all_r
+License path:  7112@don:
+FLEXnet Licensing error:-125,147
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+-----------------------------------------------------
+"smokeadvanced_x86_64_r" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license cannot be checked out because:
+A PACKAGE component must be specified.
+Feature:       smokeadvanced_x86_64_r
+License path:  7112@don:
+FLEXnet Licensing error:-125,147
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+-----------------------------------------------------
+"flare_x86_64_r" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license cannot be checked out because:
+A PACKAGE component must be specified.
+Feature:       flare_x86_64_r
+License path:  7112@don:
+FLEXnet Licensing error:-125,147
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+-----------------------------------------------------
+"burn_x86_64_r" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license cannot be checked out because:
+A PACKAGE component must be specified.
+Feature:       burn_x86_64_r
+License path:  7112@don:
+FLEXnet Licensing error:-125,147
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+-----------------------------------------------------
+"burn_x86_64_r_2012_1" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"burn_x86_64_r_2012" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"wiretapgw_all_r_2012" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license can be checked out
+-----------------------------------------------------
+"flare_x86_64_r_2012" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license can be checked out
+-----------------------------------------------------
+"flare_x86_64_r_2011" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,   expires: 20-dec-2011
+
+This license can be checked out
+-----------------------------------------------------
+"smokeadvanced_x86_64_r_2012" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"flamepremium_x86_64_r_2012" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------
+"flame_x86_64_r_2012" v2012.999, vendor: discreet_l
+  License server: don
+  floating license  starts: 1-jan-1990,  no expiration date
+
+
+This license can be checked out
+-----------------------------------------------------

@@ -1,0 +1,199 @@
+No license server system for this feature.
+Licensed number of users already reached.
+No port number in license file and "FLEXnet" service does not exist.
+No socket connection to license server manager.
+Invalid (inconsistent) license key.
+Invalid date format in license file.
+Invalid returned data from license server system.
+No SERVER lines in license file.
+Cannot find SERVER hostname in network database.
+Cannot connect to license server system.
+Cannot read data from license server system.
+Cannot write data to license server system.
+License server system does not support this feature.
+License server system busy (no majority).
+License file does not support this version.
+Feature checkin failure detected with license server system.
+License server system temporarily busy (new server connecting).
+Users are queued for this feature.
+License server system does not support this version of this feature.
+Request for more licenses than this feature supports.
+Feature start date is in the future.
+Bad encryption handshake with vendor daemon.
+Clock difference too large between client and license server system.
+In the queue for this feature.
+Feature database corrupted in vendor daemon.
+Duplicate selection mismatch for this feature.
+User/host on EXCLUDE list for feature.
+User/host not on INCLUDE list for feature.
+Cannot allocate dynamic memory.
+Feature was never checked out.
+No key data supplied in call to lc_new_job() or lc_init().
+Function not available in this version.
+Software is evaluation version.
+Clock setting check not available in vendor daemon.
+Date invalid for binary format.
+Vendor daemon did not respond within timeout interval.
+Checkout request rejected by vendor-defined checkout filter.
+No FEATURESET line in license file.
+Incorrect FEATURESET line in license file.
+Cannot compute FEATURESET data from license file.
+License server system message checksum failure.
+Cannot read license file data from license server system.
+Network software (tcp/ip) not available.
+You are not a license administrator.
+lmremove request before the minimum lmremove interval.
+Unknown VENDORCODE struct type passed to lc_new_job() or lc_init().
+Include file/library version mismatch.
+No licenses available to borrow.
+License BORROW support not enabled.
+FLOAT_OK can't run standalone on license server system.
+Meter already being updated, locked.
+Invalid TZ environment variable.
+Old VENDORCODE (3-word) struct type passed to lc_new_job() or lc_init().
+Local checkout filter rejected request.
+Attempt to read beyond end of license file path.
+Internal Error - Please report to Macrovision Corporation.
+Bad version number - must be floating point number, with no letters.
+FLEXadmin API functions not available.
+Invalid PACKAGE line in license file.
+Version of vendor daemon is too old.
+USER_BASED license has no specified users -- see license server system log.
+License server system does not support this request.
+License object already in use.
+Checkout exceeds MAX specified in options file.
+System clock has been set back.
+This platform not authorized by license.
+Future license file format or misspelling in license file.
+Encryption seeds are non-unique.
+Feature removed during lmreread, or wrong SERVER line hostid.
+This feature is available in a different license pool.
+Attempt to generate license with incompatible attributes.
+Network connect to THIS_HOST failed.
+License server machine is down or not responding.
+The desired vendor daemon is down.
+This FEATURE line can't be converted to decimal format.
+The decimal format license is typed incorrectly.
+Cannot remove a linger license.
+All licenses are reserved for others.
+A FLEXid borrow error occurred.
+Cannot checkout an uncounted license within a Windows Terminal Services guest session.
+Feature already returned to license server system.
+License server system is out of network connections.
+Cannot borrow a PACKAGE component.
+Cannot read dongle: check dongle or driver.
+lmgr.res, Windows Resource file, not linked.
+SIGN= keyword required but missing from the license certificate.
+TRL not supported for this platform.
+lmdown/lmreread must be run on the license server machine.
+Cannot lmdown the server when licenses are borrowed.
+FLOAT_OK requires exactly one dongle hostid.
+Unable to delete local borrow info.
+Returning a borrowed license early is not supported.
+Error returning borrowed license.
+A PACKAGE component must be specified.
+Composite hostid not initialized.
+An item needed for composite hostid missing or invalid.
+Error, borrowed license doesn't match any known server license.
+Internal Error (NULL pointer).
+Internal Error (Empty string).
+Internal Error (Bad memory access).
+Internal Error (Operation not supported).
+Error writing to socket.  Peer has closed socket.
+Error, cannot generate version specific license tied to a single hostid, which is composite.
+Version-specific signatures are not supported for uncounted licenses.
+License template contains redundant signature specifiers.
+License key required but missing from the license certificate.
+Trusted Storage compromised; repair needed
+Invalid activation request received
+No fulfillment exists in trusted storage which matches the request
+Invalid activation response received
+Cannot return the specified activation
+Return count(s) would exceed max for the fulfillment
+Specified operation is not allowed.
+User/host on EXCLUDE list for entitlement.
+User/host not in INCLUDE list for entitlement.
+Invalid date format in trusted storage.
+	Invalid SUPERSEDE_SIGN syntax
+SUPERSEDE_SIGN does not contain a feature name and license signature
+ONE_TS_OK is not supported in this Windows Platform.
+Internal Error - 178. Please report to Macrovision Corporation.
+Only One Terminal Server Remote Client checkout is allowed for this feature.
+Internal Error - 180. Please report to Macrovision Corporation.
+Internal Error - 181. Please report to Macrovision Corporation.
+Internal Error - 182. Please report to Macrovision Corporation.
+	 Usually this error message should be ignored.
+	It occurs when the FLEXnet Licensing error message function was called
+	though no error was detected.
+	The license files (or license server system network addresses) attempted are 
+	listed below.  Use LM_LICENSE_FILE to use a different license file,
+	or contact your software provider for a license file.
+There is a license server manager/vendor daemon running, but it's for
+other vendors.
+The license key and data for the feature do not match.
+	This usually happens when a license file has been altered.
+	The hostid of this system does not match the hostid
+	specified in the license file.
+	The lookup for the hostname on the SERVER line in the
+	license file failed.  This often happens when NIS or DNS
+	or the hosts file is incorrect.  Workaround: Use IP-Address
+	(e.g., 123.456.789.123) instead of hostname.
+	The license server manager (lmgrd) has not been started yet,
+	the wrong port@host or license file is being used, or the
+	port or hostname in the license file has been changed.
+	The license server system appears to be running, but is not
+	responding.  If this persists, notify the System Administrator.
+	(The license server manager (lmgrd) and vendor daemon processes
+	should be terminated and restarted.)
+	This error can occur because the license server system isn't running, or
+	the FLEXenabled application needs to add @localhost with the
+	lmpath command.
+lmutil lmborrow -startupdate was issued but not updated yet.
+To override this, stop and restart the license server system.
+WARNING: overriding may cause loss of licenses.
+The file was issued for a later version of FLEXnet Licensing than this
+program understands.
+This is a warning condition.  The license server system has pooled one
+or more INCREMENT lines into a single pool, and the request was made on
+an INCREMENT line that has been pooled.  If this is reported as an
+error, it's an internal error.
+The license file indicates THIS_HOST, and the server is not
+running on this host.  If it's running on a different host, 
+THIS_HOST should be changed to the correct host.
+See the system adminstrator about starting the license server system, or
+make sure you're referring to the right host (see LM_LICENSE_FILE).
+Check the lmgrd log file, or try lmreread.
+The system administrator has reserved all the licenses for others.
+Reservations are made in the options file. The license server system must
+be restarted for options file changes to take effect.
+Retry the checkout again for a shorter period.
+The vendor daemon can't handle any more users.
+
+
+See the license server manager (lmgrd) debug log for further information.
+ Either the hardware dongle is not attached, or the necessary
+ software driver for this dongle type is not installed.
+ When linking Windows binaries, you must link with lmgr.lib as
+ well as lmgr.res.
+ In order to read the dongle hostid, the correct driver must be
+ installed.  These drivers are available at www.macrovision.com
+ or from your software vendor.
+ This is probably because the license is older than the application
+ You need to obtain a SIGN= version of this license from your vendor.
+ Use lmstat to find the users that have the licenses borrowed.
+Trusted Storage is invalid, and needs to be repaired.
+Trusted Storage contains a fulfillment record which is invalid.
+The return is not allowed because one or more fulfillment record counts
+would exceed the allowed maximum.
+There are no repairs left to service this repair request.
+SUPERSEDE and SUPERSEDE_SIGN can not be used at the same time.
+Invalid syntax for SUPERSEDE_SIGN={"feature1:signature" "feature2:signature" ....}
+Feature name and signature are required for SUPERSEDE_SIGN
+Application version > License version
+Requested hours > allowed hours
+INVALID FLEXnet Licensing error code
+%-15s%d,%d.  System Error: %d "%s"
+For further information, refer to the FLEXnet Licensing documentation,
+available at "www.macrovision.com".
+%s%s%s%s%s
+

@@ -1,0 +1,222 @@
+#!/usr/bin/python
+# vim:tabstop=2:expandtab
+"""
+DL XMLRPC Class
+This class just provides an interface to
+functions we want to perform on a flame / smoke etc...
+"""
+import string
+import os
+import sys
+import threading
+import syslog
+import popen2
+import select
+import time
+import socket
+import signal
+import re
+from A52 import xmlserver
+
+class Stone(xmlserver.Daemon):
+	''' the ImageMagick xmlprc '''
+	def __init__(self,data):
+		'''Inits the Variables '''
+		# set the umask here so that frames created will behave
+		os.umask(02)
+		os.chdir("/")
+
+		self.serverdata=data
+		self.data = {}
+		self.lock = threading.Lock()
+		self.output = ""
+		print "Init Done"
+
+	def _run_command(self,command,uid):
+		"""
+		this is our little code to run the command and monitor it
+		we actually want to lock the adding and removal since we 
+		want to be able to fetch partial output from the export 
+    		"""
+		control = popen2.Popen3(command,1)
+		while control.poll() == -1 :
+			t = select.select([control.fromchild,control.childerr],[],[],0.05)
+		if control.fromchild in t[0]:
+			s = os.read(control.fromchild.fileno(),16384)
+			self.lock.acquire()
+			self.data[uid]['data'] = self.data[uid]['data'] + s
+			self.lock.release()
+			self.data[uid]['all'] = self.data[uid]['all'] + s
+		if control.childerr in t[0]:
+			s = os.read(control.childerr.fileno(),16384)
+			self.lock.acquire()
+			self.data[uid]['err'] = self.data[uid]['err'] + s
+			self.lock.release()
+			self.data[uid]['allerr'] = self.data[uid]['allerr'] + s
+		# check to see if we should kill this process 
+		if self.data[uid]['quit']: 
+			print "process %d killed" % control.pid
+			os.kill(control.pid,signal.SIGTERM)
+		time.sleep(0.01)
+
+		print "done with popen"
+		s1 = os.read(control.fromchild.fileno(),16384)
+		s2 = os.read(control.childerr.fileno(),16384)
+		self.lock.acquire()
+		self.data[uid]['data'] = self.data[uid]['data'] + s1
+		self.data[uid]['err'] = self.data[uid]['err'] + s2
+		self.lock.release()
+		self.data[uid]['all'] = self.data[uid]['all'] + s1
+		self.data[uid]['allerr'] = self.data[uid]['allerr'] + s2
+		control.fromchild.close()
+		control.tochild.close()
+		return control.sts/256
+
+	def help(self):
+		''' returns exported command list'''
+		help  = "convert(uid,in_file,out_file,in_start,in_end,out_start,arguments\n"
+		help += "get_status(uid)\n"
+		help += "get_fullstatus(uid)\n"
+		help += "get_uids()\n"
+		help += "free(uid)\n"
+		help += "df()\n"
+		return help
+
+	def convert(self,*args):
+		'''export command. it only spawns the thread and return the unique id'''
+		if len(args) != 7:
+			return 0
+		t = threading.Thread(group = None, target = self._convert, args = args)
+		t.setDaemon(True)
+		t.start()
+		return args[0]
+  
+	def _convert(self,*args):
+		'''The convert Thread non advertised.'''
+		uid       = args[0]
+		in_file   = args[1]
+		out_file  = args[2]
+		in_start  = args[3]
+		in_end    = args[4]
+		out_start = args[5]
+		arguments = args[6]
+
+		self.data[uid]={}
+		self.data[uid]['data']  =""
+		self.data[uid]['all']   =""
+		self.data[uid]['err']   =""
+		self.data[uid]['allerr']=""
+		self.data[uid]['status']=""
+		self.data[uid]['quit']  = False
+		self.data[uid]['frame'] = in_start
+
+		for i in range(in_start,(in_end+1)):
+			ifile = in_file  % i
+			ofile = out_file % ( out_start + (i-in_start) )
+			command = "convert %s %s %s" % ( arguments,ifile,ofile)
+			print command
+			#self._run_command(command,uid)
+			ret = os.system(command)
+			if ret:
+				print "ERRROR(%s): %d" % (uid,ret)
+				return
+			self.data[uid]['frame']=i
+			if self.data[uid]['quit']:
+				self.data[uid]['quit']=False
+				return
+
+	def stop(self,uid):
+		''' sets the killing variable '''
+		try:
+			self.data[uid]['quit'] = True
+		except:pass
+		return
+
+	def df(self):
+		''' return local disk usage '''
+		try:
+			df={}
+			fss=os.popen("df -l -B1 -txfs").readlines()[1:]
+			for fs in fss:
+				r=re.search("(\d+)\s+(\d+)\s+(\d+)\s+(\d+)%\s+/(.*[mv][d0-9]+)",fs)
+				if r:
+					df[r.group(5)]={}
+					df[r.group(5)]['byte_capacity']=r.group(1)
+					df[r.group(5)]['bytes_used']=r.group(2)
+					df[r.group(5)]['bytes_free']=r.group(3)
+					df[r.group(5)]['percentage']=r.group(4)
+				return df
+		except:
+			return None
+      
+	def get_status(self,uid):
+		"""
+		Returns the cached output from running job
+		Clearing returned value from cache
+		"""
+		# check first to see if we have this uid...
+		if self.data.has_key(uid):
+			try:
+				self.lock.acquire()
+				data =  self.data[uid]['data']
+				err =  self.data[uid]['err']
+				status = self.data[uid]['status']
+				frame = self.data[uid]['frame']
+				self.data[uid]['data']=""
+				self.data[uid]['err']=""
+				self.lock.release()
+				return {	'data': data.split("\n"), 
+						'status':status,
+						'err': err.split("\n"),
+						'frame': frame}
+			except:pass
+		return { 'all': "", 'status':"","allerr": "","frame":0}
+
+	def get_fullstatus(self,uid):
+		'''Returns all the cached output from running job'''
+		try: 
+			data = self.data[uid]['all']
+			err = self.data[uid]['allerr']
+			status = self.data[uid]['status']
+			frame = self.data[uid]['frame']
+		except:
+			return { 'all': "", 'status':"",'allerr': "",'frame':0 }
+		return {	'all': data.split("\n"), 
+				'status': status,
+				"allerr": err.split("\n"),
+				"frame": frame}
+
+	def free(self,uid):
+		"""
+		Free the memory used by the various dictionaries
+		associated with unique id
+		"""
+		try:
+			del self.data[uid] 
+		except:
+			return 1
+		return 0
+
+	def get_uids(self):
+		''' Return a list of active uids '''
+		return self.data.keys()
+
+if __name__ == '__main__':
+	#server = xmlserver.Server(Stone,port=3333)
+	# start/stop/restart the daemon
+	if len(sys.argv) > 1:
+		daemon = Stone()
+		if sys.argv[1] == 'start':
+			daemon.start()
+		elif sys.argv[1] == 'stop':
+			daemon.stop()
+		elif sys.argv[1] == 'restart':
+			daemon.restart()
+		else:
+			print "Unknown command"
+			sys.exit(2)
+		sys.exit(0)
+	else:
+		d = Stone()
+		#d.run()
+

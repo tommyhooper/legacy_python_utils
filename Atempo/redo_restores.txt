@@ -1,0 +1,36 @@
+mysql> select uid,tape_id,path,mod_date,status from consolidation_files where status='restored' order by path;
++-------+-------------------------+-----------------------------------------------------------------------------+---------------------+----------+
+| uid   | tape_id                 | path                                                                        | mod_date            | status   |
++-------+-------------------------+-----------------------------------------------------------------------------+---------------------+----------+
+| 75894 | Discreet_Archive0000025 | /2009_archive/09A228_LEGO_2010_DA/09A228_LEGO_2010_DA_3.seg                 | 2010-01-29 12:50:00 | restored |
+| 79627 | Discreet_Archive0000249 | /2009_archive/09A240_PG_olympics_DA/09A240_PG_olympics_DA_4.seg             | 2010-01-28 09:31:00 | restored |
+| 79695 | Discreet_Archive0000254 | /2009_archive/09E160_honda_bravo_2010_DA/09E160_honda_bravo_2010_DA_3.seg   | 2010-02-02 08:02:00 | restored |
+| 79666 | Discreet_Archive0000251 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_13.seg    | 2010-10-29 08:35:00 | restored |
+| 79669 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_3.seg     | 2010-10-14 09:01:00 | restored |
+| 79670 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_4.seg     | 2010-10-19 02:13:00 | restored |
+| 79671 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_5.seg     | 2010-10-19 03:24:00 | restored |
+| 79672 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_6.seg     | 2010-10-19 10:53:00 | restored |
+| 79673 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_7.seg     | 2010-10-21 00:16:00 | restored |
+| 79674 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_8.seg     | 2010-10-21 01:19:00 | restored |
+| 79675 | Discreet_Archive0000252 | /2010_archive/10A160_Xbox_Natal_2011_DA/10A160_Xbox_Natal_2011_DA_9.seg     | 2010-10-21 15:28:00 | restored |
+| 79600 | Discreet_Archive0000245 | /2010_archive/10A175_nescafe_2011_DA/10A175_nescafe_2011_DA_18.seg          | 2010-10-21 07:33:00 | restored |
+| 79640 | Discreet_Archive0000250 | /2010_archive/10A175_nescafe_2011_DA/10A175_nescafe_2011_DA_22.seg          | 2010-11-04 22:07:00 | restored |
+| 79656 | Discreet_Archive0000251 | /2010_archive/10A198_chevy_volt_DA/10A198_chevy_volt_DA_6.seg               | 2010-10-25 23:51:00 | restored |
+| 79683 | Discreet_Archive0000253 | /2010_archive/10A198_chevy_volt_DA/10A198_chevy_volt_DA_7.seg               | 2010-10-28 22:56:00 | restored |
+| 79619 | Discreet_Archive0000248 | /2010_archive/10A201_lexus_copier_DA/10A201_lexus_copier_DA_4.seg           | 2010-10-13 07:56:00 | restored |
+| 79620 | Discreet_Archive0000248 | /2010_archive/10A201_lexus_copier_DA/10A201_lexus_copier_DA_5.seg           | 2010-10-18 06:51:00 | restored |
+| 79686 | Discreet_Archive0000253 | /2010_archive/10A201_target_round_five_DA/10A201_target_round_five_DA       | 2010-10-26 10:03:00 | restored |
+| 79687 | Discreet_Archive0000253 | /2010_archive/10A201_target_round_five_DA/10A201_target_round_five_DA_1.seg | 2010-10-26 10:03:00 | restored |
+| 79688 | Discreet_Archive0000253 | /2010_archive/10A203_lexus_holiday_DA/10A203_lexus_holiday_DA               | 2010-11-19 10:52:00 | restored |
+| 79582 | Discreet_Archive0000245 | /2010_archive/10A204_budweiser_DA/10A204_budweiser_DA_1.seg                 | 2010-11-17 00:40:00 | restored |
+| 79691 | Discreet_Archive0000253 | /2010_archive/10A209_jeep_interiors_DA/10A209_jeep_interiors_DA             | 2010-11-15 17:46:00 | restored |
+| 79692 | Discreet_Archive0000253 | /2010_archive/10A209_jeep_interiors_DA/10A209_jeep_interiors_DA_1.seg       | 2010-10-27 08:51:00 | restored |
+| 79698 | Discreet_Archive0000254 | /2010_archive/10A209_jeep_interiors_DA/10A209_jeep_interiors_DA_2.seg       | 2010-10-28 00:12:00 | restored |
+| 79699 | Discreet_Archive0000254 | /2010_archive/10A209_jeep_interiors_DA/10A209_jeep_interiors_DA_3.seg       | 2010-11-01 08:21:00 | restored |
+| 79700 | Discreet_Archive0000254 | /2010_archive/10A211_hp_surgeon_rev_DA/10A121_hp_surgeon_rev_DA             | 2010-11-15 17:37:00 | restored |
+| 79701 | Discreet_Archive0000254 | /2010_archive/10A211_hp_surgeon_rev_DA/10A121_hp_surgeon_rev_DA_1.seg       | 2010-10-19 09:22:00 | restored |
+| 79702 | Discreet_Archive0000254 | /2010_archive/10A211_hp_surgeon_rev_DA/10A121_hp_surgeon_rev_DA_2.seg       | 2010-11-12 09:54:00 | restored |
+| 79703 | Discreet_Archive0000254 | /2010_archive/10E198_comcast_DA/10E198_comcast_DA                           | 2010-11-19 00:12:00 | restored |
+| 79704 | Discreet_Archive0000254 | /2010_archive/10E198_comcast_DA/10E198_comcast_DA_1.seg                     | 2010-10-25 12:17:00 | restored |
++-------+-------------------------+-----------------------------------------------------------------------------+---------------------+----------+
+

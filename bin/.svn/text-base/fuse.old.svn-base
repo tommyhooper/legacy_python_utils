@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import os,sys
+from optparse import OptionParser
+#import os,re,sys,glob
+#import gobject,gtk
+
+
+p = OptionParser()
+p.add_option("-v",dest='version', type='string',help="Version to use. e.g. flame_2011.1.SP4")
+p.add_option("-d",dest='use_dev', action='store_true', default=False,help="Run the development version")
+options,args = p.parse_args()
+
+# add the path for the main modules
+if options.use_dev:
+	print "\n**** DEVELOPMENT VERSION ****\n"
+	sys.path.append('/disks/nas2/discreet/dev/python2.3/site-packages')
+	sys.path.append('/hosts/opal/bipool/nas2/discreet/dev/python2.3/site-packages/')
+else:
+	sys.path.append('/disks/nas2/discreet/lib/python2.3/site-packages')
+	sys.path.append('/hosts/opal/bipool/nas2/discreet/lib/python2.3/site-packages/')
+from fuse.pyre import Pyre
+
+if options.version:
+	iffs_home = options.version
+else:
+	try:
+		iffs_home = os.getenv('HOME')
+	except:
+		print "\nCould not find HOME environment variable. Exiting...\n"
+		sys.exit()
+
+dl_info = Pyre.parse_iffs_home(iffs_home)
+print "IFFS Version: %s" % dl_info['version']
+
+if dl_info['version_short'] == '2008':
+	from fuse import fuse_2008 as fuse
+elif dl_info['version_short'] == '2009':
+	from fuse import fuse_2009 as fuse
+elif dl_info['version_short'] == '2010':
+	from fuse import fuse_2010 as fuse
+elif dl_info['version_short'] == '2011':
+	from fuse import fuse_2011 as fuse
+else:
+	print "Unrecognized version. Exiting..."
+	sys.exit()
+
+main_window=fuse.fuse_ui.run(dl_info['home'])
