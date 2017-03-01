@@ -81,6 +81,13 @@ if __name__ == '__main__':
 			print "\n[41mERROR[m: Cannot %s %s " % (ARCH_TYPE,abs_path)
 			print "       Only projects in the flame_%s directory can be used with this command\n" % (ARCH_TYPE)
 			sys.exit()
+
+		# reconstruct the path based on the virtual root defined in dl_archive. 
+		# this allows us to manipulate the real location of flame_backup / flame_archive
+		# using symbolic links while letting the atempo catalog think we're still 
+		# in it's virtual root
+		abs_path = "%s/%s" % (DiscreetArchive.VIRTUAL_ROOT,'/'.join(abs_path.split('/')[3:]))
+
 		DA = DiscreetArchive(abs_path)
 
 		print "  Project: \x1b[38;5;37m%s\x1b[0m" % path
@@ -95,7 +102,10 @@ if __name__ == '__main__':
 			arch_queue.append(DA)
 
 	if not arch_queue:
-		print "\n  Nothing to %s. Exiting...\n" % (ARCH_TYPE)
+		if ttl_bytes == 0:
+			print "\n  Nothing to %s (Total size = 0 bytes). Exiting...\n" % (ARCH_TYPE)
+		else:
+			print "\n  Nothing to %s. Exiting...\n" % (ARCH_TYPE)
 		sys.exit()
 
 	print "\n  Total %s size: %s\n" % (ARCH_TYPE,numberutil.humanize(ttl_bytes,scale='bytes'))
