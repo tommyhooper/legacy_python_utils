@@ -541,11 +541,13 @@ class TinaObject(consolidation_files):
 		return match
 	
 
-	def validate_archive(self,virtual_root='/Volumes/F6412SATA01/flame_archive'):
+	def validate_archive(self,virtual_root=None):
 		"""
 		Validate the file with the entry
 		in the new pool
 		"""
+		if not virtual_root:
+			virtual_root = '%s/flame_archive' % DiscreetArchive.VIRTUAL_ROOT
 		# file information
 		target = "%s/%s/%s/%s" % (	virtual_root,
 							self.data['archive_base_dir'],
@@ -795,7 +797,7 @@ class TinaRestore(TinaBase):
 	
 	def __init__(self,	path_folder=None,
 					application='appl.tina.a52.com.fs',
-					path_dest='/Volumes/F6412SATA01/consolidation',
+					path_dest=None,
 					file_list=None,
 					dest_list=None,
 					mode='abort',
@@ -808,7 +810,10 @@ class TinaRestore(TinaBase):
 			self.application = application
 		self.depth = depth
 		self.path_folder = path_folder
-		self.path_dest = path_dest
+		if not path_dest:
+			self.path_dest = '%s/consolidation' % DiscreetArchive.VIRTUAL_ROOT
+		else:
+			self.path_dest = path_dest
 		self.file_list = file_list
 		self.dest_list = dest_list
 		self.mode = mode
