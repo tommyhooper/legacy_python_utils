@@ -65,7 +65,7 @@ class DiscreetArchive:
 				'Discreet_2010_Archive':['/2010_archive'],
 				'Discreet_2011_Archive':['/2011_archive'],
 				}
-	VIRTUAL_ROOT = '/Volumes/F6412SATA01'
+	VIRTUAL_ROOT = '/Volumes/flame_archive'
 
 	def __init__(	self,
 				path=None,
@@ -103,7 +103,7 @@ class DiscreetArchive:
 		"""
 		Split the path into required parts.
 
-		/Volumes/F6412SATA01/flame_backup/2012/12A777-some_project
+		/Volumes/flame_archive/flame_backup/2012/12A777-some_project
 		"""
 		split = path.split('/')
 		if len(split) != 6:
@@ -113,7 +113,7 @@ class DiscreetArchive:
 		root = '/'.join(split[0:3])
 		if root != self.virtual_root:
 			message = 'Root must be %s (%s)' % (self.virtual_root,path)
-			raise Exception,message
+#			raise Exception,message
 
 		self.base_dir = split[3]
 		if self.base_dir not in self.allow_base_dirs:
@@ -388,19 +388,31 @@ class DiscreetArchive:
 		_pool = self._get_project_tina_entries(pool=element.pool,refresh=refresh)
 		if _pool:
 			for f in _pool._find(path=path):
+#				print("    \x1b[48;5;28m\x1b[38;5;255mEntry found:%s\x1b[m" % (element.filename))
 				# compare the dates
 				# round the mod date to minutes
 				file_date = element.mod_date.replace(second=0,microsecond=0)
 				tina_date = TinaFind.convert_date(f['modification_date'])
 				date_match = tina_date == file_date
+#				print("    Tina date: %s" % tina_date)
+#				if date_match:
+#					print("    \x1b[38;5;82mFile date: %s\x1b[m" % file_date)
+#				else:
+#					print("    \x1b[38;5;196mFile date: %s\x1b[m" % file_date)
 
 				# compare the file sizes
 				target = "%s/%s" % (self.segment_path,element.filename)
 				cnv_bytes = TinaFind.convert_bytes(f['size'],f['scale'])
 				st_size = fileutil.st_size(target)
 				size_match = Tina.compare_filesizes(cnv_bytes,st_size)
+#				print("    Tina size: %s" % cnv_bytes)
+#				if size_match:
+#					print("    \x1b[38;5;82mFile size: %s\x1b[m" % st_size)
+#				else:
+#					print("    \x1b[38;5;196mFile size: %s\x1b[m" % st_size)
 
 				if date_match and size_match:
+#					print("    \x1b[48;5;28m\x1b[38;5;255mStatus: ARCHIVED\x1b[m")
 					return True
 
 				# if the size does not match for a header file,
