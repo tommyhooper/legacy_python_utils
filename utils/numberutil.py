@@ -2,6 +2,7 @@
 #import decimal
 import string
 import re
+import math
 
 #HOURS_PER_DAY = decimal.Decimal("8.00")
 
@@ -56,6 +57,15 @@ def humanize(num,scale='kilobytes'):
 			return "%s%s" % (round(num,1),key[r])
 	else:
 		return "%s%s" % (int(round(num,0)),key[r])
+
+def humanize_test(size,scale=None):
+	if (size == 0):
+		return '0B'
+	size_name = ("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+	i = int(math.floor(math.log(size,1024)))
+	p = math.pow(1024,i)
+	s = round(size/p,2)
+	return '%s %s' % (s,size_name[i])
 
 #def accounting_format(num, precision='0.01'):
 #    if num == None:

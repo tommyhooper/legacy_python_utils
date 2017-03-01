@@ -30,8 +30,7 @@ from optparse import OptionParser
 p = OptionParser()
 p.add_option("-s",dest='start_seg', type='int',help="Segment number to start at. For restoring a specific range or specific segment.")
 p.add_option("-e",dest='end_seg', type='int',help="Segment number to end at. For restoring a specific range or specific segment.")
-#p.add_option("-d",dest='dest_path', type='string',default='/Volumes/F6412SATA01/holding',help="Directory restores will be written in.")
-p.add_option("-a",dest='dest_array', type='string',default='/Volumes/F6412SATA01',help="The array restores will be written to.")
+p.add_option("-a",dest='dest_array', type='string',default=None,help="The array restores will be written to.")
 p.add_option("-E",dest='email', action='store_true',default=True,help="Do not send email status")
 p.add_option("-c",dest='seg_count', type='int',default=None,help="Number of segements to restore starting with the last segment first. Useful for restoring the last 'x' segments.")
 p.add_option("-b",dest='flame_backup', action='store_true',default=False,help="Use flame_backup instead of flame_archive for restores.")
@@ -114,6 +113,10 @@ if __name__ == '__main__':
 		help()
 		sys.exit()
 
+
+	if not options.dest_array:
+		options.dest_array = DiscreetArchive.VIRTUAL_ROOT
+
 	if options.flame_backup:
 		base_dir = 'flame_backup'
 		strat = 'B'
@@ -125,6 +128,9 @@ if __name__ == '__main__':
 			dest_path = '%s/%s' % (options.dest_array,base_dir)
 		else:
 			dest_path = '%s/holding' % (options.dest_array)
+
+	# show where we're restoring to
+	print "\n  \x1b[38;5;43mRestore path set to:\x1b[m %s" % dest_path
 
 	# resolve the project name(s)
 	abort = False

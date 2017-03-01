@@ -541,11 +541,13 @@ class TinaObject(consolidation_files):
 		return match
 	
 
-	def validate_archive(self,virtual_root='/Volumes/F6412SATA01/flame_archive'):
+	def validate_archive(self,virtual_root=None):
 		"""
 		Validate the file with the entry
 		in the new pool
 		"""
+		if not virtual_root:
+			virtual_root = '%s/flame_archive' % DiscreetArchive.VIRTUAL_ROOT
 		# file information
 		target = "%s/%s/%s/%s" % (	virtual_root,
 							self.data['archive_base_dir'],
@@ -795,7 +797,7 @@ class TinaRestore(TinaBase):
 	
 	def __init__(self,	path_folder=None,
 					application='appl.tina.a52.com.fs',
-					path_dest='/Volumes/F6412SATA01/consolidation',
+					path_dest=None,
 					file_list=None,
 					dest_list=None,
 					mode='abort',
@@ -808,7 +810,10 @@ class TinaRestore(TinaBase):
 			self.application = application
 		self.depth = depth
 		self.path_folder = path_folder
-		self.path_dest = path_dest
+		if not path_dest:
+			self.path_dest = '%s/consolidation' % DiscreetArchive.VIRTUAL_ROOT
+		else:
+			self.path_dest = path_dest
 		self.file_list = file_list
 		self.dest_list = dest_list
 		self.mode = mode
@@ -875,7 +880,7 @@ class TinaBackup(TinaBase):
 
 
 		#TESTING NOTES:
-		You have filesystem application Discreet_2010 with virtual root of /Volumes/F6412SATA01
+		You have filesystem application Discreet_2010 with virtual root of /Volumes/flame_archive
 		You have a backup selection of /hoop_test which applies to both strategy b & c
 		Strategy B is backup strategy which goes to dl_backup_test pool in tar format
 		Strategy C is Archive strategy which goes to dl_archive_test pool in tar format.
@@ -1992,8 +1997,8 @@ if __name__ == '__main__':
 	a = Tina()
 	#o = a.tina_find(path_folder='A_to_backup/14A100_lowes_spring',application='nas0-taylor.a52.com.fs',list_all=True)
 	# force a restore to fail so I can see the wall of text error message
-	a.restore(path_folder='/flame_archive/2014/14A153_Workday_Heart_Archive_2015_SP3/14A153-Workday_Heart_Archive_2015_9.seg',application='appl.flame_archive-X',path_dest='/Volumes/F6412SATA01/tmp',strat='B')
-#	tina_restore -folder appl.flame_archive -depth 10Y -mode abort -strat A -path_dest /Volumes/F6412SATA01/holding/2014/14A153_Workday_Heart_Archive_2015_SP3/.restore -path_folder 
+	a.restore(path_folder='/flame_archive/2014/14A153_Workday_Heart_Archive_2015_SP3/14A153-Workday_Heart_Archive_2015_9.seg',application='appl.flame_archive-X',path_dest='/Volumes/flame_archive/tmp',strat='B')
+#	tina_restore -folder appl.flame_archive -depth 10Y -mode abort -strat A -path_dest /Volumes/flame_archive/holding/2014/14A153_Workday_Heart_Archive_2015_SP3/.restore -path_folder 
 #	/flame_archive/2014/14A153_Workday_Heart_Archive_2015_SP3/14A153-Workday_Heart_Archive_2015_9.seg 
 # 	-event_to_console
 

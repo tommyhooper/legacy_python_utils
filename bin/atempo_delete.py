@@ -52,7 +52,7 @@ def help():
 	[44mExamples:[m
 	     atempo_delete flame_backup/2012/12A104_ASICS_DC_1_DA
 	     atempo_delete flame_archive/2012/12A104_ASICS_DC_1_DA
-	     atempo_delete /Volumes/F6412SATA01/flame_archive/2012/12A104_ASICS_DC_1_DA
+	     atempo_delete /Volumes/Quantastor02/flame_archive/2012/12A104_ASICS_DC_1_DA
 
 	NOTE: This command will only delete files that have been written to tape. 
 	      In order to delete files that have not been written to tape you must 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 		last_seg = DA.last_segment()
 		first_seg = DA.first_segment()
 
-		for ele in DA.elements:
+		for ele in sorted(DA.elements, key=lambda x: stringutil.extract_numbers(x.filename)):
 			save = False
 			# previous to 2016.2.1 segment 1 needed
 			# to exist in order for the flame to 
