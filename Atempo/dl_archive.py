@@ -59,11 +59,7 @@ class DLAProjectNotFound(Exception):
 
 class DiscreetArchive:
 
-	# /Volumes/F6412SATA02/2011_archive/11A172_Dodge_Durango_X12_DA
-	# /Volumes/F6412SATA01/hoop_test/2012_archive/77A777_Project_01
 	# APPLICATION = 'Discreet_2010_Archive'
-	# VIRTUAL_ROOT = '/Volumes/F6412SATA02'
-	# VIRTUAL_ROOT = '/Volumes/F6412SATA01'
 	# STRAT_PATH = 'hoop_test'
 	OLD_APPS = {	'tina.a52.com.fs':['/2007_archive','/2008_archive','/2009_archive','/2010_archive','/archive'],
 				'Discreet_2010_Archive':['/2010_archive'],
@@ -73,7 +69,7 @@ class DiscreetArchive:
 
 	def __init__(	self,
 				path=None,
-				virtual_root='/Volumes/F6412SATA01',
+				virtual_root=VIRTUAL_ROOT,
 				application='flame_archive',
 				close=False):
 		self.allow_base_dirs = ['flame_archive','flame_backup','flame_consolidate']
@@ -235,18 +231,20 @@ class DiscreetArchive:
 				status = 'on tape'
 			else:
 				status = hdr.status
+			size = numberutil.humanize(hdr.st_size,scale='bytes')
 			m = "    %-10s" % hdr.pool
 			m+= '\x1b[38;5;%dm%-14s\x1b[0m' %  (self.status_cc[hdr.status],status)
-			m+= "%-48s"  % hdr.filename
+			m+= "\x1b[38;5;%dm[\x1b[0m%s\x1b[38;5;%dm]\x1b[0m %-48s" % (self.status_cc[hdr.status],size,self.status_cc[hdr.status],hdr.filename)
 			print m
 		for seg in seg_sort:
 			if seg.status == 'archived':
 				status = 'on tape'
 			else:
 				status = seg.status
+			size = numberutil.humanize(seg.st_size,scale='bytes')
 			m = "    %-10s" % seg.pool
 			m+= '\x1b[38;5;%dm%-14s\x1b[0m' % (self.status_cc[seg.status],status)
-			m+= "%-48s" % seg.filename
+			m+= "\x1b[38;5;%dm[\x1b[0m%s\x1b[38;5;%dm]\x1b[0m %-48s" % (self.status_cc[seg.status],size,self.status_cc[seg.status],seg.filename)
 			print m
 
 
@@ -704,7 +702,7 @@ class DiscreetConsolidate:
 	"""
 
 	def __init__(	self,
-				virtual_root='/Volumes/F6412SATA01',
+				virtual_root=DiscreetArchive.VIRTUAL_ROOT,
 				base_dir='flame_consolidate',
 				application='flame_archive',
 				dry_run=True):
