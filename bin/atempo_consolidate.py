@@ -64,7 +64,7 @@ def help():
             tapes need to be loaded and a list is given.
 
             The restores are put in the flame_consolidate directory of the
-            current archive array (e.g. Quantastor02). They are restored into
+            current archive array (e.g. /Volumes/flame_archive). They are restored into
             a '.restore' directory then moved in the correct place after the
             restore has finished.
 

@@ -52,7 +52,7 @@ def help():
 	[44mExamples:[m
 	     atempo_delete flame_backup/2012/12A104_ASICS_DC_1_DA
 	     atempo_delete flame_archive/2012/12A104_ASICS_DC_1_DA
-	     atempo_delete /Volumes/Quantastor02/flame_archive/2012/12A104_ASICS_DC_1_DA
+	     atempo_delete /Volumes/flame_archive/flame_archive/2012/12A104_ASICS_DC_1_DA
 
 	NOTE: This command will only delete files that have been written to tape. 
 	      In order to delete files that have not been written to tape you must 
