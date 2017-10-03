@@ -71,11 +71,13 @@ class DiscreetArchive:
 				path=None,
 				virtual_root=VIRTUAL_ROOT,
 				application='flame_archive',
-				close=False):
+				close=False,
+				skip_filter=None):
 		self.allow_base_dirs = ['flame_archive','flame_backup','flame_consolidate']
 		self.virtual_root = virtual_root
 		self.application = application
 		self.close = close
+		self.skip_filter = skip_filter
 		self._parse_path(path)
 
 		# list to store elements contained within
@@ -527,7 +529,7 @@ class DiscreetArchive:
 
 
 	@staticmethod
-	def find_project_archived_name(project,search_old_apps=True,base_dir='flame_archive'):
+	def find_project_archived_name(project,search_old_apps=True,base_dir='flame_archive',skip_filter=None):
 		"""
 		Searches the top level directories in each application
 		for occurences of 'project'. 
@@ -545,7 +547,12 @@ class DiscreetArchive:
 		# a parent directory that does not exist,
 		# tina_find will segfault
 		existing_paths = []
-		obj = Tina.tina_find(application='flame_archive',path_folder='/%s' % base_dir,list_all=False,recursive=False)
+		obj = Tina.tina_find(
+			application='flame_archive',
+			path_folder='/%s' % base_dir,
+			list_all=False,
+			recursive=False,
+			skip_filter=skip_filter)
 		for k,v in obj.data.iteritems():
 			if base_dir in v['path']:
 				existing_paths.append(v['path'])
@@ -555,7 +562,12 @@ class DiscreetArchive:
 			path_folders = existing_paths
 
 		for pfolder in path_folders:
-			obj = Tina.tina_find(application='flame_archive',path_folder=pfolder,list_all=False,recursive=False)
+			obj = Tina.tina_find(
+				application='flame_archive',
+				path_folder=pfolder,
+				list_all=False,
+				recursive=False,
+				skip_filter=skip_filter)
 			if obj:
 				for k,v in obj.data.iteritems():
 					if project.lower() in v['path'].lower():
@@ -567,14 +579,22 @@ class DiscreetArchive:
 
 		for app,dirs in DiscreetArchive.OLD_APPS.iteritems():
 			for top_lvl in dirs:
-				obj = Tina.tina_find(application=app,path_folder=top_lvl,list_all=False,recursive=False)
+				obj = Tina.tina_find(
+					application=app,
+					path_folder=top_lvl,
+					list_all=False,
+					recursive=False,
+					skip_filter=skip_filter)
 				if obj:
 					for k,v in obj.data.iteritems():
 						if project.lower() in v['path'].lower():
 							results[os.path.split(v['path'])[1]] = True
 		return results.keys()
 
-	def find_archived_project_files(self,search_old_apps=True,search_consolidate=False,search_backup=False):
+	def find_archived_project_files(self,
+		search_old_apps=True,
+		search_consolidate=False,
+		search_backup=False):
 		"""
 		Search for a project in all the known
 		applications and gather all of the 
@@ -635,14 +655,22 @@ class DiscreetArchive:
 				try:
 					return self.tina_archive_entries
 				except: pass  
-			self.tina_archive_entries = Tina.tina_find(path_folder=path_folder,application=self.application,strat='A')
+			self.tina_archive_entries = Tina.tina_find(
+				path_folder=path_folder,
+				application=self.application,
+				strat='A',
+				skip_filter=self.skip_filter)
 			return self.tina_archive_entries
 		elif pool == 'backup':
 			if not refresh:
 				try:
 					return self.tina_backup_entries
 				except: pass
-			self.tina_backup_entries = Tina.tina_find(path_folder=path_folder,application=self.application,strat='B')
+			self.tina_backup_entries = Tina.tina_find(
+				path_folder=path_folder,
+				application=self.application,
+				strat='B',
+				skip_filter=self.skip_filter)
 			return self.tina_backup_entries
 			
 	def _search_old_applications(self,path,filename=None):
@@ -658,10 +686,19 @@ class DiscreetArchive:
 			for top_lvl in dirs:
 				path_folder = "%s/%s" % (top_lvl,path)
 				if filename:
-					obj = Tina.tina_find(application=app,path_folder=path_folder,pattern=filename,list_all=True)
+					obj = Tina.tina_find(
+						application=app,
+						path_folder=path_folder,
+						pattern=filename,
+						list_all=True,
+						skip_filter=self.skip_filter)
 				else:
 					#print "Searching for:",app,path_folder
-					obj = Tina.tina_find(application=app,path_folder=path_folder,list_all=True)
+					obj = Tina.tina_find(
+						application=app,
+						path_folder=path_folder,
+						list_all=True,
+						skip_filter=self.skip_filter)
 				if obj:
 					result_objs.append(obj)
 		return result_objs

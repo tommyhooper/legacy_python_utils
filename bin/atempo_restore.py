@@ -138,7 +138,7 @@ if __name__ == '__main__':
 	for project in args:
 		print "\n  Resolving project name: %s: " % project,
 		sys.stdout.flush()
-		resolved_names = DiscreetArchive.find_project_archived_name(project,base_dir=base_dir)
+		resolved_names = DiscreetArchive.find_project_archived_name(project,base_dir=base_dir,skip_filter='.offset')
 		if project in resolved_names:
 			# found an exact match
 			print "[42m%s[m" % (project)
@@ -170,7 +170,11 @@ if __name__ == '__main__':
 			# At some point the flame_archive directory was archived into the B strategy
 			# which can cause some restore issues we want to make a warning for.
 			#search_results = DiscreetArchive(path)._get_project_tina_entries(pool='backup',refresh=True)
-			obj = Tina.tina_find(path_folder=path_folder,application='flame_archive',strat='B')
+			obj = Tina.tina_find(
+				path_folder=path_folder,
+				application='flame_archive',
+				strat='B',
+				skip_filter='.offset')
 			if obj.found_status == TinaFind.FOUND_SET_MATCH:
 				print "\n  [41mWARNING:[m 1 or more elements of this 'flame_archive' project show up in the backup strategy."
 				print "  (There should never be a 'flame_archive' path in the backup strategy, but it happens)"
@@ -190,7 +194,9 @@ if __name__ == '__main__':
 
 		found = {}
 		print "\n  Getting files for: [42m%s[m" % project
-		search_results = DiscreetArchive(path).find_archived_project_files(search_old_apps=True,search_consolidate=True)
+		search_results = DiscreetArchive(path,skip_filter='.offset').find_archived_project_files(
+			search_old_apps=True,
+			search_consolidate=True)
 		if not search_results:
 			print "\nCould not find %s\n" % project
 			sys.exit()
@@ -246,6 +252,12 @@ if __name__ == '__main__':
 				filtered.append(f)
 			time.sleep(.02)
 		queue += filtered
+
+
+	if len(queue) == 0:
+		# nothing to restore
+		print "\n  Nothing to restore. Exiting...\n"
+		sys.exit()
 
 	# check the library for unloaded tapes
 	ready = False

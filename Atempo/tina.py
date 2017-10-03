@@ -645,6 +645,7 @@ class TinaBase(object):
 		self.data = {}
 		self.count = 0
 		self.db = False
+		self.skip_filter = None
 
 	def source_env(self):
 		env_file = '/usr/Atempo/TimeNavigator/tina/.tina.sh'
@@ -701,6 +702,11 @@ class TinaBase(object):
 		split_lines = self.output.split('\n')
 		i = 0
 		for line in split_lines:
+			# if we have a skip filter attribute, and it has a value,
+			# then use it to skip lines that match it.
+			if self.__dict__.has_key('skip_filter') and \
+				self.skip_filter and self.skip_filter in line:
+				continue
 			if len(line.split(';')) == self.csv_split_count:
 				data[i] = self._split_csv_line(line)
 				i+=1
@@ -918,8 +924,18 @@ class TinaFind(TinaBase):
 	FOUND_SET_MATCH = 0x03
 	FOUND_SET_ERROR = 0x04
 
-	def __init__(self,path_folder,pattern=None,application='tina.a52.com.fs',depth='10Y',list_all=False,recursive=True,strat=None):
-		#print "PATH FOLDER:",path_folder
+	def __init__(self,
+		path_folder,
+		pattern=None,
+		application='tina.a52.com.fs',
+		depth='10Y',
+		list_all=False,
+		recursive=True,
+		strat=None,
+		skip_filter=None):
+		"""
+		Main init
+		"""
 		self.application = application
 		self.path_folder = path_folder
 		self.pattern = pattern
@@ -927,6 +943,7 @@ class TinaFind(TinaBase):
 		self.list_all = list_all
 		self.recursive = recursive
 		self.strat = strat
+		self.skip_filter = skip_filter
 		self.command = "tina_find"
 		self.command_options = [
 			"-output_format csv",
