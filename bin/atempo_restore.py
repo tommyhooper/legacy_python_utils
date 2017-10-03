@@ -247,6 +247,12 @@ if __name__ == '__main__':
 			time.sleep(.02)
 		queue += filtered
 
+
+	if len(queue) == 0:
+		# nothing to restore
+		print "\n  Nothing to restore. Exiting...\n"
+		sys.exit()
+
 	# check the library for unloaded tapes
 	ready = False
 	print "\n  Searching for barcodes..."
