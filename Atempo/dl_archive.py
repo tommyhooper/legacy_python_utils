@@ -65,7 +65,7 @@ class DiscreetArchive:
 				'Discreet_2010_Archive':['/2010_archive'],
 				'Discreet_2011_Archive':['/2011_archive'],
 				}
-	VIRTUAL_ROOT = '/Volumes/flame_archive'
+	VIRTUAL_ROOT = '/Volumes/MD3860'
 
 	def __init__(	self,
 				path=None,
@@ -515,7 +515,6 @@ class DiscreetArchive:
 ####################### TESTING ###########################3
 #			Tina.backup(path=path,application='fake_application',strat=strat,dry_run=dry_run)
 ####################### TESTING ###########################3
-
 			Tina.backup(path=path,application='flame_archive',strat=strat,dry_run=dry_run)
 		_stop = datetime.today()
 		self.archive_delta = (_stop-_start)
