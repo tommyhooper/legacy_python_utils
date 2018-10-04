@@ -25,6 +25,7 @@
 #
 ###############################################
 
+import shlex
 import subprocess as subp
 import os
 import commands
@@ -678,9 +679,14 @@ class TinaBase(object):
 
 	def _exec(self,command):
 		#self._exec_start = datetime.datetime.today()
-		self.status,self.output = commands.getstatusoutput(command)
+#		self.status,self.output = commands.getstatusoutput(command)
 		#self._exec_end = datetime.datetime.today()
-		return self.status,self.output
+#		return self.status,self.output
+
+		# using subprocess without the shell option to be able to run extremely 
+		# long commands (i.e. Slims Revenge 3,001 segments - command was 290k characters long)
+		proc = subp.call(shlex.split(command),stdout=subp.PIPE,stderr=subp.PIPE)
+		return (status,proc.stdout,proc.stderr)
 
 		# NOTE: Popen returns the error codes from the shell directly
 		# but was having some issues with random 'fdopen' errors.
