@@ -21,6 +21,7 @@ else:
 from A52.Atempo import *
 from A52.utils import dateutil
 from A52.utils import messenger
+from glob import glob
 
 if not "/dev/" in exe_path:
 	# log the command that was run for reference
@@ -69,13 +70,31 @@ if __name__ == '__main__':
 		help()
 		sys.exit()
 
+	arch_queue = []
+	ttl_bytes = 0
+
+	# iterate through the command line path args and resolve
+	# the relative paths to a project
+	resolved_paths = []
+	for path in args:
+		# if we're given relative paths then find the project
+		if path[0] != '/':
+			gpath = "%s/flame_%s/*/%s*" % (
+				DiscreetArchive.VIRTUAL_ROOT,
+				ARCH_TYPE,
+				path.strip('/').split('/')[-1])
+			for _path in glob(gpath):
+				print "  \x1b[38;5;78mResolved path\x1b[0m: %s \x1b[38;5;78m-->\x1b[m %s" % (path,_path)
+				resolved_paths.append(_path)
+		else:
+			resolved_paths.append(path)
+
 	#print "\n  %-48s%-12s%-18s" % ('Building Queue...','Pool','Status')
 	print "\n  %-12s%-18s%-48s" % ( 'Pool', 'Status', 'Building Queue...')
 	print "  %s" % ("-"*80)
 
-	arch_queue = []
-	ttl_bytes = 0
-	for path in args:
+	# iterate through the resolved paths and archive
+	for path in resolved_paths:
 		abs_path = os.path.abspath(path)
 		if abs_path.split('/')[3] != 'flame_%s' % ARCH_TYPE:
 			print "\n[41mERROR[m: Cannot %s %s " % (ARCH_TYPE,abs_path)
