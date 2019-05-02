@@ -35,6 +35,7 @@ p.add_option("-E",dest='email', action='store_true',default=True,help="Do not se
 p.add_option("-c",dest='seg_count', type='int',default=None,help="Number of segements to restore starting with the last segment first. Useful for restoring the last 'x' segments.")
 p.add_option("-b",dest='flame_backup', action='store_true',default=False,help="Use flame_backup instead of flame_archive for restores.")
 p.add_option("-i",dest='in_place', action='store_true',default=False,help="Restore files in place instead of to 'holding'")
+p.add_option("-f",dest='full_search', action='store_true',default=False,help="Search all year folders for a project (default search year corresponding to a project job number: 19A100 = 2019)")
 options,args = p.parse_args()
 
 
@@ -118,10 +119,12 @@ if __name__ == '__main__':
 		options.dest_array = DiscreetArchive.VIRTUAL_ROOT
 
 	if options.flame_backup:
+		application = 'flame_backup'
 		base_dir = 'flame_backup'
 		strat = 'B'
 		dest_path = '%s/%s' % (options.dest_array,base_dir)
 	else:
+		application = 'flame_archive'
 		base_dir = 'flame_archive'
 		strat = 'A'
 		if options.in_place:
@@ -136,18 +139,27 @@ if __name__ == '__main__':
 	abort = False
 	project_names = []
 	for project in args:
-		print "\n  Resolving project name: %s: " % project,
+		print "\n  Resolving project name: %s: " % project
 		sys.stdout.flush()
-		resolved_names = DiscreetArchive.find_project_archived_name(project,base_dir=base_dir,skip_filter='.offset')
+		resolved_names = DiscreetArchive.find_project_archived_name(
+			project,
+			base_dir=base_dir,
+			skip_filter='.offset',
+			application=application,
+			full_search=options.full_search,
+			verbose=True
+		)
 		if project in resolved_names:
 			# found an exact match
-			print "[42m%s[m" % (project)
+			#print "[42m%s[m" % (project)
+			print "       * [44m%s[m" % (project)
 			project_names.append(project)
 		elif len(resolved_names) == 1:
-			print "[42m%s[m" % (resolved_names[0])
+			#print "[42m%s[m" % (resolved_names[0])
+			print "       * [44m%s[m" % (resolved_names[0])
 			project_names.append(resolved_names[0])
 		elif len(resolved_names) > 1:
-			print "\n      [31mWarning:[m Multiple names found for %s:" % project
+			print "      [31mWarning:[m Multiple names found for %s:" % project
 			for name in resolved_names:
 				print "       * [44m%s[m" % (name)
 			print "      Please specify one of these on the command line.\n"
@@ -194,9 +206,14 @@ if __name__ == '__main__':
 
 		found = {}
 		print "\n  Getting files for: [42m%s[m" % project
-		search_results = DiscreetArchive(path,skip_filter='.offset').find_archived_project_files(
-			search_old_apps=True,
-			search_consolidate=True)
+		search_results = DiscreetArchive(
+			path,
+			skip_filter='.offset',
+			application=application
+			).find_archived_project_files(
+				search_old_apps=True,
+				search_consolidate=True
+			)
 		if not search_results:
 			print "\nCould not find %s\n" % project
 			sys.exit()
