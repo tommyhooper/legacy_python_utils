@@ -122,7 +122,7 @@ if __name__ == '__main__':
 		application = 'flame_backup'
 		base_dir = 'flame_backup'
 		strat = 'B'
-		dest_path = '%s/%s' % (options.dest_array,base_dir)
+		dest_path = '%s/%s/restore' % (options.dest_array,base_dir)
 	else:
 		application = 'flame_archive'
 		base_dir = 'flame_archive'
@@ -287,6 +287,7 @@ if __name__ == '__main__':
 			for label in label_list:
 				if 'off' not in label and not labels.has_key(label):
 					obj = Tina.get_label_info(label)
+					print "    %-20s-->  %-12s %s" % (label,obj.data['barcode'],obj.data['location'])
 					labels[label] = obj.data
 	
 		external = []
