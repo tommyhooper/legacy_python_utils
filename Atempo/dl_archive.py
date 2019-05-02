@@ -528,7 +528,15 @@ class DiscreetArchive:
 
 
 	@staticmethod
-	def find_project_archived_name(project,search_old_apps=True,base_dir='flame_archive',skip_filter=None):
+	def find_project_archived_name(
+		project,
+		search_old_apps=True,
+		base_dir='flame_archive',
+		skip_filter=None,
+		application='flame_archive',
+		full_search=False,
+		verbose=False
+	):
 		"""
 		Searches the top level directories in each application
 		for occurences of 'project'. 
@@ -547,7 +555,7 @@ class DiscreetArchive:
 		# tina_find will segfault
 		existing_paths = []
 		obj = Tina.tina_find(
-			application='flame_archive',
+			application=application,
 			path_folder='/%s' % base_dir,
 			list_all=False,
 			recursive=False,
@@ -555,14 +563,22 @@ class DiscreetArchive:
 		for k,v in obj.data.iteritems():
 			if base_dir in v['path']:
 				existing_paths.append(v['path'])
-		if parent_dir in existing_paths:
+		# if the year folder is an actual year, and it matches the
+		# project's parsed year, then only search in that folder...
+		# UNLESS the full_search flag is set
+		if year != 'misc' and not full_search and parent_dir in existing_paths:
 			path_folders = [parent_dir]
 		else:
 			path_folders = existing_paths
 
 		for pfolder in path_folders:
+			# skip directories that start with '.'
+			if [x for x in pfolder.strip('/').split('/') if x[0] == '.']:
+				continue
+			if verbose:
+				print "      \x1b[38;5;122mSearching in\x1b[m: %s" % (pfolder)
 			obj = Tina.tina_find(
-				application='flame_archive',
+				application=application,
 				path_folder=pfolder,
 				list_all=False,
 				recursive=False,
@@ -576,18 +592,19 @@ class DiscreetArchive:
 		if not search_old_apps:
 			return results.keys()
 
-		for app,dirs in DiscreetArchive.OLD_APPS.iteritems():
-			for top_lvl in dirs:
-				obj = Tina.tina_find(
-					application=app,
-					path_folder=top_lvl,
-					list_all=False,
-					recursive=False,
-					skip_filter=skip_filter)
-				if obj:
-					for k,v in obj.data.iteritems():
-						if project.lower() in v['path'].lower():
-							results[os.path.split(v['path'])[1]] = True
+		if application == 'flame_archive':
+			for app,dirs in DiscreetArchive.OLD_APPS.iteritems():
+				for top_lvl in dirs:
+					obj = Tina.tina_find(
+						application=app,
+						path_folder=top_lvl,
+						list_all=False,
+						recursive=False,
+						skip_filter=skip_filter)
+					if obj:
+						for k,v in obj.data.iteritems():
+							if project.lower() in v['path'].lower():
+								results[os.path.split(v['path'])[1]] = True
 		return results.keys()
 
 	def find_archived_project_files(self,
@@ -605,7 +622,8 @@ class DiscreetArchive:
 
 		year = Tina.parse_year(self.project)
 		# archive pool - strategy 'A'
-		if self.base_dir == 'flame_archive':
+#		if self.base_dir == 'flame_archive':
+		if self.base_dir:
 			#print "Searching flame_archive in archive pool"
 			obj = self._get_project_tina_entries(pool='archive')
 			if obj:
@@ -620,14 +638,14 @@ class DiscreetArchive:
 			if obj:
 				results.append(obj)
 
-		if self.base_dir == 'flame_backup':
-			#print "Searching flame_backup in backup pool"
-			# normally we shouldn't be restoring from flame_backup
-			# but it can happen
-			# backup pool - strategy 'B'
-			obj = self._get_project_tina_entries(pool='backup')
-			if obj:
-				results.append(obj)
+#		if self.base_dir == 'flame_backup':
+#			#print "Searching flame_backup in backup pool"
+#			# normally we shouldn't be restoring from flame_backup
+#			# but it can happen
+#			# backup pool - strategy 'B'
+#			obj = self._get_project_tina_entries(pool='archive')
+#			if obj:
+#				results.append(obj)
 
 		reduced = TinaFind.reduce_results(results)
 		return reduced
@@ -648,29 +666,41 @@ class DiscreetArchive:
 		The object represents a project that exists in 
 		"""
 		if not path_folder: path_folder = self.catalog_path
-		if pool == 'archive':
-			# if we're searching the archive pool we want to search in
-			if not refresh:
-				try:
-					return self.tina_archive_entries
-				except: pass  
-			self.tina_archive_entries = Tina.tina_find(
-				path_folder=path_folder,
-				application=self.application,
-				strat='A',
-				skip_filter=self.skip_filter)
-			return self.tina_archive_entries
-		elif pool == 'backup':
-			if not refresh:
-				try:
-					return self.tina_backup_entries
-				except: pass
-			self.tina_backup_entries = Tina.tina_find(
-				path_folder=path_folder,
-				application=self.application,
-				strat='B',
-				skip_filter=self.skip_filter)
-			return self.tina_backup_entries
+		if not refresh:
+			try:
+				return self.tina_archive_entries
+			except: pass  
+		self.tina_archive_entries = Tina.tina_find(
+			path_folder=path_folder,
+			application=self.application,
+			strat='A',
+			skip_filter=self.skip_filter)
+		return self.tina_archive_entries
+
+#		NOTE: There is no longer a 'B' strategy - this should be removed eventually
+#		if pool == 'archive':
+#			# if we're searching the archive pool we want to search in
+#			if not refresh:
+#				try:
+#					return self.tina_archive_entries
+#				except: pass  
+#			self.tina_archive_entries = Tina.tina_find(
+#				path_folder=path_folder,
+#				application=self.application,
+#				strat='A',
+#				skip_filter=self.skip_filter)
+#			return self.tina_archive_entries
+#		elif pool == 'backup':
+#			if not refresh:
+#				try:
+#					return self.tina_backup_entries
+#				except: pass
+#			self.tina_backup_entries = Tina.tina_find(
+#				path_folder=path_folder,
+#				application=self.application,
+#				strat='B',
+#				skip_filter=self.skip_filter)
+#			return self.tina_backup_entries
 			
 	def _search_old_applications(self,path,filename=None):
 		"""
