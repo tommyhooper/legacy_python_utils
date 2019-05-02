@@ -48,6 +48,7 @@ from models import job_ids
 from models import cart_job_ids
 from models import job_id_files
 from A52.db import controller
+from cmd import Command
 db = controller()
 
 import logging
@@ -657,42 +658,53 @@ class TinaBase(object):
 			os.environ[var] = value
 
 	def run(self,parse=True,verbose=False):
-		# form the command	
+		"""
+		Run the command using the subprocess module.
+		"""
 		self.form_command()
-		log.info(self.command)
+		obj = Command(self.command)
 		if verbose:
-			print " %s\n" % self.command
+			print " %s\n" % obj.command
 		# source the tina environment
 		self.source_env()
-		# run the find command
-		self.status,self.output = self._exec(self.command)
+		obj.run()
+		self.status = obj.status
+		self.output = obj.output
+		# the older _exec version which uses the commands
+		# module. This fails if the command line gets too long.
+		#self.status,self.output = self._exec(self.command)
+
+		# Note: The older _exec method for running the command
+		# returned the output as a single string. The newer
+		# subprocess method returns the output as a list.
+		# The parser now accepts both but older parts of the 
+		# code are going to expect the single string.
+		# We'll accomodate both for now until I can be sure
+		# the all of the older code can accept a list.
 		if self.status > 0:
-			for line in self.output.split("\n"):
-				event.info(line)
-			raise TinaError,self.output
+			if type(self.output) is list:
+				for line in self.output:
+					event.info(line)
+				raise TinaError,'\n'.join(self.output)
+			else:
+				for line in self.output.split("\n"):
+					event.info(line)
+				raise TinaError,self.output
 		if parse:
 			# parse the output
 			self._parse()
+		elif type(self.output) is list:
+			# Older parts of the code expect the 
+			# return to be a single string with
+			# new line characters instead of a list
+			self.output = '\n'.join(self.output)
 
 	def form_command(self):
 		self.command = "%s %s -event_to_console" % (self.command," ".join(self.command_options))
 
-	def _exec(self,command):
-		#self._exec_start = datetime.datetime.today()
+#	def _exec(self,command):
 #		self.status,self.output = commands.getstatusoutput(command)
-		#self._exec_end = datetime.datetime.today()
 #		return self.status,self.output
-
-		# using subprocess without the shell option to be able to run extremely 
-		# long commands (i.e. Slims Revenge 3,001 segments - command was 290k characters long)
-		proc = subp.call(shlex.split(command),stdout=subp.PIPE,stderr=subp.PIPE)
-		return (status,proc.stdout,proc.stderr)
-
-		# NOTE: Popen returns the error codes from the shell directly
-		# but was having some issues with random 'fdopen' errors.
-		#proc = subp.Popen(command,shell=True,stdout=subp.PIPE,stderr=subp.PIPE)
-		#status = proc.wait()
-		#return (status,proc.stdout,proc.stderr)
 
 	def _parse(self):
 		"""
@@ -705,7 +717,10 @@ class TinaBase(object):
 			message = "No results from search"
 			raise TinaError,message
 
-		split_lines = self.output.split('\n')
+		if type(self.output) is list:
+			split_lines = self.output
+		else:
+			split_lines = self.output.split('\n')
 		i = 0
 		for line in split_lines:
 			# if we have a skip filter attribute, and it has a value,
@@ -720,7 +735,7 @@ class TinaBase(object):
 				# send any unparsed lines to the event log
 				event.info(line)
 		if not data:
-			self.data = None
+			self.data = {}
 			self.count = 0
 			#message = "No results from search"
 			#raise TinaError,message
@@ -1691,6 +1706,7 @@ class Tina:
 		try:
 			obj.run(verbose=False)
 		except TinaError,error:
+			traceback.print_exc()
 			#print error.message
 			return None
 		return obj
