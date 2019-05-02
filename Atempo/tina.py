@@ -759,7 +759,7 @@ class TinaBase(object):
 		Convert the cartridge output
 		from tina into a python list.
 		"""
-		return re.findall('[A-Za-z_]*[0-9]{7}',cart_str)
+		return re.findall('[A-Za-z_]*[0-9]{7,}',cart_str)
 				
 class TinaODBFree(TinaBase):
 	"""
