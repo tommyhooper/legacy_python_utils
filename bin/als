@@ -2,6 +2,7 @@
 
 import os,string,re,sys
 from optparse import OptionParser
+from scandir import walk
 
 p = OptionParser()
 p.add_option("-R",dest='recursive', action='store_true',default=False,help="List recursive sequences (careful where you run tis from)")
@@ -51,7 +52,8 @@ def scan_dir_for_sequences(search_dir):
 		# 1) get a list of all the files found in this directory
 		# 2) loop through each file running the regular exp. if the prefix or extension changes, we have a new sequence
 		found_files = list()
-		for root, dirs, files in os.walk(search_dir):
+		#for root, dirs, files in os.walk(search_dir):
+		for root, dirs, files in walk(search_dir):
 			if files:
 				for file in files:
 					full_path_file = "%s/%s" % (root,file)
