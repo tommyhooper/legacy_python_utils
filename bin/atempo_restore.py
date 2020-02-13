@@ -245,11 +245,18 @@ if __name__ == '__main__':
 		for f in headers + sorted(segments, key=lambda x: stringutil.extract_numbers(x['filename']),reverse=True):
 			if f['filename'] == '.DS_Store':
 				continue
+			if f['filename'][-8:] == 'lock.ext' or f['filename'][-5:] == 'lock':
+				continue
 			year = Tina.parse_year("%s/%s" % (f['parent_dir'],f['filename']))
 
 			f['path_dest'] = "%s/%s/%s" % (dest_path,year,project)
 			f['filename'] = os.path.split(f['path'])[1]
 			f['target'] = "%s/%s" % (f['path_dest'],f['filename'])
+
+			# if the target is a lockfile, skip it
+			if f['target'].find('-lock') > 0:
+				continue
+
 			f['temp_target'] = "%s/.restore/%s" % (f['path_dest'],f['filename'])
 			print "  %s..." % (f['path']),
 			sys.stdout.flush()
@@ -269,7 +276,6 @@ if __name__ == '__main__':
 				filtered.append(f)
 			time.sleep(.02)
 		queue += filtered
-
 
 	if len(queue) == 0:
 		# nothing to restore
