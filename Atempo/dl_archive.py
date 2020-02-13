@@ -66,6 +66,7 @@ class DiscreetArchive:
 				'Discreet_2011_Archive':['/2011_archive'],
 				}
 	VIRTUAL_ROOT = '/Volumes/MD3860'
+	#VIRTUAL_ROOT = '/Volumes/QXS-SAN1'
 
 	def __init__(	self,
 				path=None,
